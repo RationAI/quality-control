@@ -1,10 +1,9 @@
 import numpy as np
-import pyvips
 from numpy.typing import NDArray
 from PIL.Image import Image
 from skimage.morphology import area_opening
 
-from rationai.qc.typing import QcValues
+from rationai.qc.typing import QcValues, RGBImage
 from rationai.staining import ColorConversion, convert_color
 
 
@@ -95,7 +94,7 @@ def _get_debris_coverage(
 
 
 def residual_artifacts_and_coverage(
-    img: pyvips.Image,
+    img: RGBImage,
     conversion: ColorConversion,
     nucleus_area: int,
     res_index: int,
@@ -104,11 +103,10 @@ def residual_artifacts_and_coverage(
     """TODO: Precise documentation."""
     result: QcValues = {}
 
-    numpy_img = img.numpy()
-    shape = numpy_img.shape[:2]
+    shape = img.shape[:2]
 
     coverage, cov_heatmap = _get_debris_coverage(
-        tile=numpy_img,
+        tile=img,
         conv=conversion,
         nucleus_area=nucleus_area,
         res_index=res_index,
@@ -117,8 +115,8 @@ def residual_artifacts_and_coverage(
 
     cov_percent_heatmap = np.full(shape=shape, dtype=np.float64, fill_value=coverage)
 
-    result["cov_heatmap"] = pyvips.Image.new_from_array(cov_heatmap)
-    result["cov_percent_heatmap"] = pyvips.new_from_array(cov_percent_heatmap)
+    result["cov_heatmap"] = cov_heatmap
+    result["cov_percent_heatmap"] = cov_percent_heatmap
     result["coverage"] = coverage
 
     return result
