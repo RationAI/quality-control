@@ -5,6 +5,7 @@ from rationai.staining import ColorConversion, convert_color
 
 
 def example_separation_function(img: RGBImage, conversion: ColorConversion) -> QcValues:
+    """TODO: precise documentation."""
     result: QcValues = {}
 
     h_channel, e_channel, r_channel = convert_color(img, conversion)
