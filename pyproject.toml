@@ -3,14 +3,17 @@ name = "rationai-qc"
 version = "1.0.0"
 description = ""
 authors = [
-    { name = "Jakub Pekár", email = "jakubpekar@mail.muni.cz" },
-    { name = "Matěj Pekár", email = "matejpekar@mail.muni.cz" },
-    { name = "Vít Musil", email = "musil@fi.muni.cz" },
+    { name = "Erik Sedlák", email = "521008@mail.muni.cz" },
+    { name = "Tomáš Balák", email = "525126@mail.muni.cz" },
 ]
 requires-python = ">=3.11"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [
+    "scikit-image>=0.24.0",
+    "pyvips>=2.2.3",
+    "numpy>=2.1.2",
+    "rationai-staining @ git+ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
 ]
 
 [tool.pdm.dev-dependencies]
