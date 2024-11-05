@@ -12,7 +12,7 @@ license = { file = "LICENSE" }
 dependencies = [
     "scikit-image>=0.24.0",
     "pyvips>=2.2.3",
-    "numpy>=2.1.2",
+    "numpy==1.26.4",
     "rationai-staining @ git+ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
 ]
 
