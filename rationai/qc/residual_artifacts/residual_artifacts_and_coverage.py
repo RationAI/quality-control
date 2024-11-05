@@ -100,10 +100,42 @@ def residual_artifacts_and_coverage(
     res_index: int,
     threshold: float,
 ) -> QcValues:
-    """TODO: Precise documentation."""
-    result: QcValues = {}
+    """Creates a binary mask of residual artifacts.
 
-    shape = img.shape[:2]
+    Args:
+        img: Image of the tissue.
+        conversion: Conversion that describes the used staining protocol.
+        nucleus_area: Approximate area of a single cell nucleus in pixels.
+        res_index: Index of the residual channel in the used staining conversion.
+        threshold: Threshold that determines if a given pixel is an artifact.
+
+    Returns:
+        Dictionary with a binary mask.
+
+        **Dictionary values**
+        * `coverage_mask`: Binary mask of the detected residual artifacts.
+        * `coverage`: A number that states what portion of the image's foreground
+            area is covered by the artifacts.
+
+    Examples:
+    ```python
+    from skimage.data import immunohistochemistry
+
+    from rationai.qc.residual_artifacts import residual_artifacts_and_coverage
+    from rationai.staining import ColorConversion
+
+
+    img = immunohistochemistry()
+
+    result = residual_artifacts_and_coverage(
+        img, ColorConversion.RGB2HDR, nucleus_area=150, res_index=2, threshold=0.012
+    )
+
+    mask = result["coverage_mask"]  # Contains values 0 and 1
+    print(result["coverage"])
+    ```
+    """
+    result: QcValues = {}
 
     coverage, cov_heatmap = _get_debris_coverage(
         tile=img,
@@ -113,10 +145,7 @@ def residual_artifacts_and_coverage(
         threshold=threshold,
     )
 
-    cov_percent_heatmap = np.full(shape=shape, dtype=np.float64, fill_value=coverage)
-
-    result["cov_heatmap"] = cov_heatmap
-    result["cov_percent_heatmap"] = cov_percent_heatmap
+    result["coverage_mask"] = cov_heatmap
     result["coverage"] = coverage
 
     return result
