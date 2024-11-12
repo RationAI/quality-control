@@ -12,8 +12,14 @@ def _separate_tile_hsv(tile: np.array):
     return hsv_image[:, :, 0], hsv_image[:, :, 1], hsv_image[:, :, 2]
 
 
-def _generate_tissue_mask_based_on_intensity():
-    return
+def _generate_tissue_mask_based_on_intensity(rgb_tile: RGBImage):
+    mask = np.logical_or(
+        np.logical_or(rgb_tile[:, :, 0] < 230, rgb_tile[:, :, 1] < 230),
+        rgb_tile[:, :, 2] < 230,
+    )
+    # closed_mask = binary_closing(mask, disk(40 // (2**level)))
+    # opened_closed_mask = binary_opening(closed_mask, disk(40 // 2**level))
+    return mask
 
 
 def folding(
@@ -22,7 +28,7 @@ def folding(
     result: QcValues = {}
 
     tile = img
-    mask = _generate_tissue_mask_based_on_intensity(tile, 3)
+    mask = _generate_tissue_mask_based_on_intensity(tile)
     mask = mask == 0
     h_channel, eosin_channel, _ = convert_color(tile, ColorConversion.RGB2HER)
     _, saturation_channel, value_channel = _separate_tile_hsv(tile)
