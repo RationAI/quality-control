@@ -10,9 +10,9 @@ def example_separation_function(img: RGBImage, conversion: ColorConversion) -> Q
 
     h_channel, e_channel, r_channel = convert_color(img, conversion)
 
-    result["H_channel"] = h_channel
-    result["E_channel"] = e_channel
-    result["R_channel"] = r_channel
+    result["channel_0"] = h_channel
+    result["channel_1"] = e_channel
+    result["channel_2"] = r_channel
 
     result["mean_residual_value"] = np.mean(r_channel)
 
