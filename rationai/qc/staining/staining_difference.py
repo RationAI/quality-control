@@ -74,7 +74,7 @@ def staining_difference(
         # stained with only one stain. Therefore, no color the difference is computed
         # for the second stain.
         diff1 = min(diff1, diff2)
-        diff2 = 0
+        diff2 = 0.0
 
     result["stain_diff1"] = diff1
     result["stain_diff2"] = diff2
