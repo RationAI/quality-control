@@ -38,7 +38,6 @@ def focus_score_piqe(img: RGBImage, pixel_size: float = 0.44) -> QcValues:
         **Dictionary values**
         * `focus_score_piqe`: Mask of the focus score.
     """
-    print("focus_score_piqe")
     result: QcValues = {}
 
     kernel_size = 2 * round(1 / pixel_size * 0.44 + 1e-9) + 1
