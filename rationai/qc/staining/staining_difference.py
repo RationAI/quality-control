@@ -69,7 +69,7 @@ def staining_difference(
         stain1, stain2, ref1, ref2, color_difference_method
     )
 
-    if color_difference(stain1, stain2, method="cie_76") < single_stain_threshold:
+    if color_difference(stain1, stain2, method="ciede_94") < single_stain_threshold:
         # The detected dominant stains are too close, they probably came from a region
         # stained with only one stain. Therefore, no color the difference is computed
         # for the second stain.
