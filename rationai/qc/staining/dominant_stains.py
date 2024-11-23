@@ -34,7 +34,7 @@ def dominant_stains(
 
     stain1, stain2 = result["stain1"], result["stain2"]
 
-    # Values should be somewhat close do Hematoxylin and DAB stain vectors.
+    # Values should be somewhat close to Hematoxylin and DAB stain vectors.
     print(stain1, stain2)
     ```
     """
