@@ -66,7 +66,7 @@ def staining_difference(
     stain1, stain2 = result["stain1"], result["stain2"]
 
     result = staining_difference(
-        ColorConversion.RGB2HDR, stain1, stain2, 33, 20, "ciede_2000", "cie_76"
+        ColorConversion.RGB2HDR, stain1, stain2, 33, 25, "ciede_2000", "cie_76"
     )
     print(result["correct_staining"])
     print(result["stain_diff1"], result["stain_diff2"])
