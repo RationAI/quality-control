@@ -1,8 +1,9 @@
 import numpy as np
+import pyvips
 from numpy.typing import NDArray
-from PIL.Image import Image
 from skimage.morphology import area_opening
 
+from rationai.masks import tissue_mask
 from rationai.qc.typing import QcValues, RGBImage
 from rationai.staining import ColorConversion, convert_color
 
@@ -22,35 +23,6 @@ def _threshold_residual_channel(
         Binary mask of the residual channel.
     """
     return np.where(residual >= threshold, 1, 0).astype(np.uint8)
-
-
-def _get_foreground_mask(
-    tile: NDArray[np.uint8], i0: int = 240, beta: float = 0.15
-) -> NDArray[np.uint8]:
-    """Returns binary mask of a foreground for a given tile.
-
-    Args:
-        tile: One tile from the wsi.
-        i0: Intensity of the transmitted light (through no stain). Defaults to 240.
-        beta: Threshold for a pixel to be considered a foreground. Defaults to 0.15.
-
-    Returns:
-        Binary foreground mask of the tile.
-    """
-    if isinstance(tile, Image):
-        tile = np.array(tile)
-
-    tile = tile.astype(np.float64)
-
-    # Value of zero corresponds to a pixel that did not capture any light
-    # Nearly no stain -> low OD values
-    od = np.maximum(0, -np.log((tile + 1) / i0))
-    od_channel_sum = np.sum(np.where(od >= beta, 1, 0), axis=2)
-
-    # Pixel is labeled as foreground if it is larger than beta in at least one channel
-    foreground_mask = np.where(od_channel_sum != 0, 1, 0).astype(np.uint8)
-
-    return foreground_mask
 
 
 def _get_debris_coverage(
@@ -81,7 +53,7 @@ def _get_debris_coverage(
     # Remove artifacts smaller that a single nucleus
     residual_mask = area_opening(residual_mask, area_threshold=nucleus_area)
 
-    foreground_mask = _get_foreground_mask(tile=tile)
+    foreground_mask = tissue_mask(pyvips.Image.new_from_array(tile)).numpy()
     foreground_area = np.count_nonzero(foreground_mask)
 
     # Keep only artifacts in the foreground
