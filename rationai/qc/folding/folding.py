@@ -60,7 +60,7 @@ def folding(
     ```python
     from skimage.data import immunohistochemistry
 
-    from rationai.qc.folding import folding
+    from rationai.qc.folding.folding import folding
 
 
     img = immunohistochemistry()
@@ -76,14 +76,19 @@ def folding(
 
     tile = img
     mask = tissue_mask == 0
-    _, saturation_channel, value_channel = rgb2hsv(tile)
+    hsv_tile = rgb2hsv(tile)
+    saturation_channel, value_channel = hsv_tile[:, :, 1], hsv_tile[:, :, 2]
     local_saturation_channel, local_value_channel, local_eosin_channel = (
         None,
         None,
         None,
     )
     if local_tiles is not None:
-        _, local_saturation_channel, local_value_channel = rgb2hsv(local_tiles)
+        hsv_local = rgb2hsv(local_tiles)
+        local_saturation_channel, local_value_channel = (
+            hsv_local[:, :, 1],
+            hsv_local[:, :, 2],
+        )
         local_value_channel = 1 - local_value_channel
     if hematoxylin_eosin_stained:
         _, eosin_channel, _ = convert_color(tile, ColorConversion.RGB2HER)
