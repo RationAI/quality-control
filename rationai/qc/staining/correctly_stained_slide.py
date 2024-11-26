@@ -1,12 +1,14 @@
 import numpy as np
 from numpy.typing import NDArray
 
+from rationai.qc.typing import QcValues
+
 
 def correctly_stained_slide(
     stain1_diffs: list[float] | NDArray[np.float64],
     stain2_diffs: list[float] | NDArray[np.float64],
     global_threshold: float,
-) -> bool:
+) -> QcValues:
     """Decides if a slide is stained with a correct staining protocol.
 
     This function decides if the per-tile computed color differences are close
@@ -20,10 +22,21 @@ def correctly_stained_slide(
             are close enough
 
     Returns:
-        True if the differences are considered to be close enough, according
-            to the threshold.
+        Dictionary with answer if the slide is stained correctly.
+
+        **Dictionary values**
+        * `correct_staining`: True if the differences are considered
+            to be close enough, according to the threshold.
+        * `stain1_diff_median`: Median of differences for the first stain.
+        * `stain2_diff_median`: Median of difference for the second stain.
     """
+    result: QcValues = {}
+
     median1 = np.nanmedian(stain1_diffs)
     median2 = np.nanmedian(stain2_diffs)
 
-    return bool((median1 + median2) < global_threshold)
+    result["stain1_diff_median"] = median1
+    result["stain2_diff_median"] = median2
+    result["correct_staining"] = (median1 + median2) < global_threshold
+
+    return result
