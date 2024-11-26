@@ -13,9 +13,9 @@ def _get_threshold(
     img: NDArray[np.float32],
     mask: NDArray[bool],  # type: ignore[PGH003]
     local_tiles: NDArray[np.float32] | None,
-    local_mask: NDArray[bool] | None,
-):  # type: ignore[PGH003]
-    """.
+    local_mask: NDArray[bool] | None,  # type: ignore[PGH003]
+):
+    """Calculates adequate threshold from given images.
 
     Args:
         img  : A given channel of an image.
@@ -54,7 +54,7 @@ def folding(
         defaults to 30s
 
     Returns:
-        Dictionary with a binary mask
+        Dictionary with a binary mask of folds.
 
     Examples:
     ```python
