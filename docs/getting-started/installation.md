@@ -1,22 +1,23 @@
-1.  ### Install **OpenSlide** for Handling WSIs
+1.  ### Install **pyvips** for Efficient Image Processing
 
-    [OpenSlide](https://openslide.org) is essential for handling whole-slide image (WSI) formats. To use `openslide-python`, you'll first need to install the OpenSlide library, followed by its Python bindings.
+    [Pyvips](https://pypi.org/project/pyvips/2.0.2/) is a powerful and fast image processing library, particularly suited for working with large images like WSIs. To install `pyvips`, ensure that the `libvips` system dependencies are installed first:
 
-    #### Linux (Debian-based):
-
-    ```bash
-    sudo apt-get install openslide-tools
-    ```
-
-    #### macOS (via Homebrew):
+    #### Linux
 
     ```bash
-    brew install openslide
+    sudo apt-get install libvips-dev
     ```
 
-    #### Windows:
+    #### macOS (via Homebrew)
 
-    Download and install the [OpenSlide binaries](https://openslide.org/download/).
+    ```bash
+    brew install vips
+    ```
+
+    #### Windows
+
+    Follow the instructions on the official [libvips installation page](https://www.libvips.org/install.html).
+
 
 2.  ### Install the Core Quality Control Library
 
@@ -34,7 +35,7 @@
         pip install git+https://gitlab.ics.muni.cz/rationai/digital-pathology/quality-control/quality-control.git
         ```
 
-    #### Installing a Specific Version:
+    #### Installing a Specific Version
 
     To install a specific version of the **Quality Control** library, use the following command, replacing `v1.0.0` with your desired version.
 
@@ -54,4 +55,4 @@
 
         Replace `v1.0.0` with the specific version you want to install.
 
-Once **OpenSlide**, and the core library are installed, you're ready to start using QC functions.
+Once **pyvips**, and the core library are installed, you're ready to start using QC functions.

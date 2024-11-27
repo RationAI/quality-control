@@ -44,13 +44,16 @@ def staining_difference(
             Options: `ciede_2000`, `ciede_94`, `cie_76`.
 
     Returns:
-        Dictionary with color differences.
+        Dictionary with color differences and a correct staining verdict.
 
-        **Dictionary values**
-        * `stain_diff1`: First stain difference.
-        * `stain_diff2`: Second stain difference.
-        * `correct_staining`: True if the stain values are close
-            to the expected ones, False otherwise.
+    Note:
+        The returned dictionary contains the following values:
+
+        | Key                   | Description                                               |
+        |-----------------------|-----------------------------------------------------------|
+        | `stain_diff1`         | First stain difference.                                   |
+        | `stain_diff2`         | Second stain difference.                                  |
+        | `correct_staining`    | True if the stain values are close to the expected ones.  |
 
     Examples:
     ```python

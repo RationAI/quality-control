@@ -82,12 +82,15 @@ def residual_artifacts_and_coverage(
         threshold: Threshold that determines if a given pixel is an artifact.
 
     Returns:
-        Dictionary with a binary mask.
+        Dictionary with a binary coverage mask and a coverage number.
 
-        **Dictionary values**
-        * `coverage_mask`: Binary mask of the detected residual artifacts.
-        * `coverage`: A number that states what portion of the image's foreground
-            area is covered by the artifacts.
+    Note:
+        The returned dictionary contains the following values:
+
+        | Key               | Description                                                                                   |
+        |-------------------|-----------------------------------------------------------------------------------------------|
+        | `coverage_mask`   | Binary mask of the detected residual artifacts.                                               |
+        | `coverage`        | A number that states what portion of the image's foreground area is covered by the artifacts. |
 
     Examples:
     ```python

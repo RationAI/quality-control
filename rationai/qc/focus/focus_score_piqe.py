@@ -33,10 +33,14 @@ def focus_score_piqe(img: RGBImage, pixel_size: float = 0.44) -> QcValues:
 
     Returns:
         Dictionary with the focus score mask.
-        Scores range from 0 to 1, where 0 is the worst and 1 is the best.
+            Scores range from 0 to 1, where 0 is the worst and 1 is the best.
 
-        **Dictionary values**
-        * `focus_score_piqe`: Mask of the focus score.
+    Note:
+        The returned dictionary contains the following values:
+
+        | Key                   | Description               |
+        |-----------------------|---------------------------|
+        | `focus_score_piqe`    | Mask of the focus score.  |
     """
     result: QcValues = {}
 

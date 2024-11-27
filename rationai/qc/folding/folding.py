@@ -43,18 +43,27 @@ def folding(
     """Creates a binary mask of folding artifacts.
 
     Args:
-        img : RGB image of the tissue
-        level_downsample : Downsample at the level at which the image is provided
-        hematoxylin_eosin_stained : True if image is stained using Hematoxylin and Eosin
-        tissue_mask : A mask, where the tissue is labeled 1 and the background 0,
-        should be as pixel-precise as possible
-        local_tiles : A local area surrounding the given tile, defaults to None
-        local_mask : Tissue mask of local_tiles
-        nucleus_diameter_at_base_level: Diameter of the nucleus at the highest resolution,
-        defaults to 30s
+        img: RGB image of the tissue.
+        level_downsample: Downsample at the level at which the image is provided.
+        hematoxylin_eosin_stained: True if image is stained using Hematoxylin and Eosin.
+        tissue_mask: A mask, where the tissue is labeled 1 and the background 0,
+            should be as pixel-precise as possible.
+        local_tiles: A local area surrounding the given tile.
+        local_mask: Tissue mask of local_tiles.
+        nucleus_diameter_at_base_level: Diameter of the nucleus at the highest resolution.
 
     Returns:
         Dictionary with a binary mask of folds.
+
+    Note:
+        The returned dictionary contains the following values:
+
+        | Key                       | Description                           |
+        |---------------------------|---------------------------------------|
+        | `folding`                 | Binary mask of the detected folds.    |
+        | `thresholded_saturation`  |                                       |
+        | `thresholded_value`       |                                       |
+        | `thresholded_eosin`       |                                       |
 
     Examples:
     ```python

@@ -10,17 +10,20 @@ def dominant_stains(
     Args:
         img: Tissue stained with two stains.
         i0: Transmitted light intensity (i.e., what is the intensity of light
-            that passed through no tissue). Defaults to 240.
-        alpha: Percentile offset for robust stain estimation. Defaults to 1.
+            that passed through no tissue).
+        alpha: Percentile offset for robust stain estimation.
         beta: Threshold for removing transparent pixels in OD-space.
-            Defaults to 0.15.
 
     Returns:
         Dictionary with two dominant stains.
 
-        **Dictionary values**
-        * `stain1`: First dominant vector.
-        * `stain2`: Second dominant vector.
+    Note:
+        The returned dictionary contains the following values:
+
+        | Key       | Description                     |
+        |-----------|---------------------------------|
+        | `stain1`  | First dominant stain vector.    |
+        | `stain2`  | Second dominant stain vector.   |
 
     Examples:
     ```python

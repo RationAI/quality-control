@@ -25,11 +25,14 @@ def is_slide_correctly_stained(
     Returns:
         Dictionary with answer if the slide is stained correctly.
 
-        **Dictionary values**
-        * `correct_staining`: True if the differences are considered
-            to be close enough, according to the threshold.
-        * `stain1_diff_median`: Median of differences for the first stain.
-        * `stain2_diff_median`: Median of difference for the second stain.
+    Note:
+        The returned dictionary contains the following values:
+
+        | Key                   | Description                                                   |
+        |-----------------------|---------------------------------------------------------------|
+        | `correct_staining`    | True if the differences are considered to be close enough.    |
+        | `stain1_diff_median`  | Median of differences for the first stain.                    |
+        | `stain2_diff_median`  | Median of difference for the second stain.                    |
     """
     result: QcValues = {}
 
