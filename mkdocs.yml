@@ -1,18 +1,15 @@
-site_name: Tiling
+site_name: Quality Control
 
 nav:
   - Introduction: index.md
   - Getting Started:
       - Installation: getting-started/installation.md
-      - Using the Quality Control Functions: getting-started/quality-control.md
+      - Quality Control Functions: getting-started/quality-control.md
 
   - API Reference:
-      - focus:
-        - focus_score_piqe: api/focus/focus-score-piqe.md
-      - folding:
-        - folding: api/folding/folding.md
-      - residual_artifacts:
-        - residual_artifacts_and_coverage: api/residual_artifacts/residual-artifacts-and-coverage.md
+      - focus_score_piqe: api/focus/focus-score-piqe.md
+      - folding: api/folding/folding.md
+      - residual_artifacts_and_coverage: api/residual_artifacts/residual-artifacts-and-coverage.md
       - staining:
         - dominant_stains: api/staining/dominant-stains.md
         - staining_difference: api/staining/staining-difference.md
