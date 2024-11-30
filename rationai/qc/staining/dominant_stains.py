@@ -15,7 +15,7 @@ def dominant_stains(
         beta: Threshold for removing transparent pixels in OD-space.
 
     Note:
-        Default values for the `i0`, `alpha`, and `beta` parameters are inspired
+        Default values for `i0`, `alpha`, and `beta` parameters are inspired
         by the <a href="https://github.com/schaugf/HEnorm_python">reference implementation</a>.
 
     Returns:
