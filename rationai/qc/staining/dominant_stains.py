@@ -14,6 +14,10 @@ def dominant_stains(
         alpha: Percentile offset for robust stain estimation.
         beta: Threshold for removing transparent pixels in OD-space.
 
+    Note:
+        Default values for the `i0`, `alpha`, and `beta` parameters are inspired
+        by the <a href="https://github.com/schaugf/HEnorm_python">reference implementation</a>.
+
     Returns:
         Dictionary with two dominant stains.
 
