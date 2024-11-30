@@ -9,10 +9,10 @@ from rationai.qc.staining import (
 
 
 __all__ = [
+    "dominant_stains",
     "focus_score_piqe",
     "folding",
-    "residual_artifacts_and_coverage",
-    "dominant_stains",
     "is_slide_correctly_stained",
+    "residual_artifacts_and_coverage",
     "staining_difference",
 ]
