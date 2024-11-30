@@ -8,9 +8,7 @@ from rationai.staining import ColorConversion, ConversionType
 
 def _stain2rgb(stain: Stain) -> NDArray[np.float64]:
     """Converts a pixel in stain space to rgb space."""
-    stain = np.maximum(stain, 1e-6)
-
-    return np.exp(-stain)
+    return np.exp(-np.maximum(stain, 1e-6))
 
 
 def reference_stain(conversion: ColorConversion, index: int) -> Stain:
