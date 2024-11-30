@@ -1,14 +1,14 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from rationai.qc.typing import QcValues
+from rationai.qc.typing import CorrectStaining
 
 
 def is_slide_correctly_stained(
     stain1_diffs: list[float] | NDArray[np.float64],
     stain2_diffs: list[float] | NDArray[np.float64],
     global_threshold: float,
-) -> QcValues:
+) -> CorrectStaining:
     """Decides if a slide is stained with an expected staining protocol.
 
     This function decides if the per-tile computed color differences are close
@@ -20,7 +20,7 @@ def is_slide_correctly_stained(
         stain1_diffs: List of differences for the first stain.
         stain2_diffs: List of differences for the second stain.
         global_threshold: Threshold used to determine if the differences
-            are close enough
+            are small enough for a slide be considered as correctly stained.
 
     Returns:
         Dictionary with answer if the slide is stained correctly.
@@ -28,19 +28,19 @@ def is_slide_correctly_stained(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                   | Description                                                   |
-        |-----------------------|---------------------------------------------------------------|
-        | `correct_staining`    | True if the differences are considered to be close enough.    |
-        | `stain1_diff_median`  | Median of differences for the first stain.                    |
-        | `stain2_diff_median`  | Median of difference for the second stain.                    |
+        | Key                   | Description                                                                                                   |
+        |-----------------------|---------------------------------------------------------------------------------------------------------------|
+        | `correct_staining`    | True if the differences are considered to be small enough for a slide to be considered as correctly stained.  |
+        | `stain1_diff_median`  | Median of differences for the first stain.                                                                    |
+        | `stain2_diff_median`  | Median of difference for the second stain.                                                                    |
     """
-    result: QcValues = {}
-
     median1 = np.nanmedian(stain1_diffs)
     median2 = np.nanmedian(stain2_diffs)
 
-    result["stain1_diff_median"] = median1
-    result["stain2_diff_median"] = median2
-    result["correct_staining"] = (median1 + median2) < global_threshold
+    result: CorrectStaining = {
+        "stain1_diff_median": float(median1),
+        "stain2_diff_median": float(median2),
+        "correct_staining": bool((median1 + median2) < global_threshold),
+    }
 
     return result

@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 from skimage.morphology import area_opening
 
 from rationai.masks import tissue_mask
-from rationai.qc.typing import QcValues, RGBImage
+from rationai.qc.typing import ResidualArtifacts, RGBImage
 from rationai.staining import ColorConversion, convert_color
 
 
@@ -71,7 +71,7 @@ def residual_artifacts_and_coverage(
     nucleus_area: int,
     res_index: int,
     threshold: float,
-) -> QcValues:
+) -> ResidualArtifacts:
     """Creates a binary mask of residual artifacts.
 
     Args:
@@ -110,8 +110,6 @@ def residual_artifacts_and_coverage(
     print(result["coverage"])
     ```
     """
-    result: QcValues = {}
-
     coverage, cov_heatmap = _get_debris_coverage(
         tile=img,
         conv=conversion,
@@ -120,7 +118,9 @@ def residual_artifacts_and_coverage(
         threshold=threshold,
     )
 
-    result["coverage_mask"] = cov_heatmap
-    result["coverage"] = coverage
+    result: ResidualArtifacts = {
+        "coverage_mask": cov_heatmap,
+        "coverage": coverage,
+    }
 
     return result

@@ -1,10 +1,10 @@
-from rationai.qc.typing import QcValues, RGBImage
+from rationai.qc.typing import DominantStains, RGBImage
 from rationai.staining import estimate_stain_vectors
 
 
 def dominant_stains(
     img: RGBImage, i0: int = 240, alpha: int = 1, beta: float = 0.15
-) -> QcValues:
+) -> DominantStains:
     """Estimates dominant stain vectors for a given image.
 
     Args:
@@ -41,10 +41,11 @@ def dominant_stains(
     print(stain1, stain2)
     ```
     """
-    result: QcValues = {}
+    stain1, stain2 = estimate_stain_vectors(img=img, i0=i0, alpha=alpha, beta=beta)
 
-    result["stain1"], result["stain2"] = estimate_stain_vectors(
-        img=img, i0=i0, alpha=alpha, beta=beta
-    )
+    result: DominantStains = {
+        "stain1": stain1,
+        "stain2": stain2,
+    }
 
     return result

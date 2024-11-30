@@ -3,7 +3,7 @@ from rationai.qc.staining.color_difference import (
     color_difference,
     reference_stain,
 )
-from rationai.qc.typing import QcValues, Stain
+from rationai.qc.typing import Stain, StainingDifference
 from rationai.staining import ColorConversion
 
 
@@ -15,7 +15,7 @@ def staining_difference(
     single_stain_threshold: float,
     color_difference_method: str,
     single_stain_difference_method: str,
-) -> QcValues:
+) -> StainingDifference:
     """Decides if the given stains are close engough to the reference stains.
 
     Args:
@@ -49,11 +49,11 @@ def staining_difference(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                   | Description                                               |
-        |-----------------------|-----------------------------------------------------------|
-        | `stain_diff1`         | First stain difference.                                   |
-        | `stain_diff2`         | Second stain difference.                                  |
-        | `correct_staining`    | True if the stain values are close to the expected ones.  |
+        | Key                   | Description                                                                                               |
+        |-----------------------|-----------------------------------------------------------------------------------------------------------|
+        | `stain_diff1`         | First stain difference.                                                                                   |
+        | `stain_diff2`         | Second stain difference.                                                                                  |
+        | `correct_staining`    | True if the stain values are close to the expected ones (i.e., their color difference is small enough).   |
 
     Examples:
     ```python
@@ -75,8 +75,6 @@ def staining_difference(
     print(result["stain_diff1"], result["stain_diff2"])
     ```
     """
-    result: QcValues = {}
-
     ref1 = reference_stain(conversion=conversion, index=0)
     ref2 = reference_stain(conversion=conversion, index=1)
 
@@ -94,8 +92,10 @@ def staining_difference(
         diff1 = min(diff1, diff2)
         diff2 = 0.0
 
-    result["stain_diff1"] = diff1
-    result["stain_diff2"] = diff2
-    result["correct_staining"] = (diff1 + diff2) < local_threshold
+    result: StainingDifference = {
+        "stain_diff1": diff1,
+        "stain_diff2": diff2,
+        "correct_staining": (diff1 + diff2) < local_threshold,
+    }
 
     return result
