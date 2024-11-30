@@ -19,7 +19,9 @@ def reference_stain(conversion: ColorConversion, index: int) -> Stain:
     return np.array(conversion.value[0][index], dtype=np.float64)
 
 
-def color_difference(reference: Stain, comparison: Stain, method: str) -> float:
+def color_difference(
+    reference: Stain, comparison: Stain, method: str = "ciede_2000"
+) -> float:
     """Computes color difference between two staining vectors.
 
     Args:
@@ -27,6 +29,18 @@ def color_difference(reference: Stain, comparison: Stain, method: str) -> float:
         comparison: Comparison stain vector of shape (3,).
         method: Method used for computing the color difference.
             Options: `ciede_2000`, `ciede_94`, `cie_76`.
+
+    Note:
+        According to our empirical analysis, `ciede_2000` method
+        provides the most stable results for the typical use case.
+        This use case mainly includes determining the color difference
+        between a detected and reference stain vectors.
+        On the other hand, `cie_76` proved to be useful for computing
+        the difference between two detected stains in order to determine
+        if the stain vectors could resemble the same stain.
+
+        All of the color difference functions, and their properties
+        can be found on <a href="https://en.wikipedia.org/wiki/Color_difference#">Wikipedia</a>.
 
     Returns:
         Distance between reference and comparison vectors
@@ -62,6 +76,18 @@ def closest_difference(
         ref2: Second reference stain vector.
         method: Method used for computing the color difference.
             Options: `ciede_2000`, `ciede_94`, `cie_76`.
+
+    Note:
+        According to our empirical analysis, `ciede_2000` method
+        provides the most stable results for the typical use case.
+        This use case mainly includes determining the color difference
+        between a detected and reference stain vectors.
+        On the other hand, `cie_76` proved to be useful for computing
+        the difference between two detected stains in order to determine
+        if the stain vectors could resemble the same stain.
+
+        All of the color difference functions, and their properties
+        can be found on <a href="https://en.wikipedia.org/wiki/Color_difference#">Wikipedia</a>.
 
     Returns:
         Color differences between the reference and comparison vectors.

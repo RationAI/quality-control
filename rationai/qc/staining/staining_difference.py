@@ -13,8 +13,8 @@ def staining_difference(
     stain2: Stain,
     local_threshold: float,
     single_stain_threshold: float,
-    color_difference_method: str,
-    single_stain_difference_method: str,
+    color_difference_method: str = "ciede_2000",
+    single_stain_difference_method: str = "cie_76",
 ) -> StainingDifference:
     """Decides if the given stains are close engough to the reference stains.
 
@@ -37,11 +37,25 @@ def staining_difference(
         color_difference_method: Method used for computing the color difference
             between the detected vectors and reference vectors.
             Options: `ciede_2000`, `ciede_94`, `cie_76`.
+            For most cases, the `ciede_2000` method is recommended.
 
         single_stain_difference_method: Method used for computing the color difference
             between the two detected stain vectors in order to determine
             if the tissue is only stained by a single stain.
             Options: `ciede_2000`, `ciede_94`, `cie_76`.
+            For most cases, the `cie_76` method is recommended.
+
+    Note:
+        According to our empirical analysis, `ciede_2000` method
+        provides the most stable results for the typical use case.
+        This use case mainly includes determining the color difference
+        between a detected and reference stain vectors.
+        On the other hand, `cie_76` proved to be useful for computing
+        the difference between two detected stains in order to determine
+        if the stain vectors could resemble the same stain.
+
+        All of the color difference functions, and their properties
+        can be found on <a href="https://en.wikipedia.org/wiki/Color_difference#">Wikipedia</a>.
 
     Returns:
         Dictionary with color differences and a correct staining verdict.
