@@ -19,8 +19,8 @@ def is_slide_correctly_stained(
     Args:
         stain1_diffs: List of differences for the first stain.
         stain2_diffs: List of differences for the second stain.
-        global_threshold: Threshold used to determine if the differences
-            are small enough for a slide be considered as correctly stained.
+        global_threshold: Threshold used to determine if the color differences
+            are small enough for a slide to be considered correctly stained.
 
     Returns:
         Dictionary with answer if the slide is stained correctly.
