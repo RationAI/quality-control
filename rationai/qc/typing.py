@@ -4,6 +4,11 @@ import numpy as np
 from numpy.typing import NDArray
 
 
+BinaryMask: TypeAlias = NDArray[np.bool_]
+"""
+Binary mask only containing values 0 and 1.
+"""
+
 RGBImage: TypeAlias = NDArray[np.uint8]
 """
 Three channel RGB image represented by a numpy array.
@@ -49,7 +54,7 @@ class DominantStains(TypedDict):
 class ResidualArtifacts(TypedDict):
     """Dictionary containing a coverage mask and a coverage number."""
 
-    coverage_mask: NDArray[np.uint8]
+    coverage_mask: BinaryMask
     """Binary mask of the detected residual artifacts."""
 
     coverage: float
