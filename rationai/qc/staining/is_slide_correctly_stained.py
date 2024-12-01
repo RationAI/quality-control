@@ -21,6 +21,10 @@ def is_slide_correctly_stained(
         stain2_diffs: List of differences for the second stain.
         global_threshold: Threshold used to determine if the color differences
             are small enough for a slide to be considered correctly stained.
+            Currently recommended thresold values are `28` for H&E stained slides
+            and `22` for H&DAB stained slides (assuming the differeces were computed
+            by the `ciede_2000` color difference method). Other similar values
+            might also provide reasonable results.
 
     Returns:
         Dictionary with answer if the slide is stained correctly.

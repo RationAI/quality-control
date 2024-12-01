@@ -28,11 +28,18 @@ def staining_difference(
 
         local_threshold: Threshold that determines if the specified stains
             are close enough to the expected stains.
+            Suitable values for this threshold and the recommended `ciede_2000`
+            difference method can be in the [20, 35] interval, depending on the staining
+            and desired level of strictness.
 
         single_stain_threshold: Threshold that determines if `stain1` and `stain2`
             are too close to eachother. If so, the region in which the stains were
             detected is assumed to be stained only by a single stain and the second
             color difference is set to 0.
+            Currently recommended value for H&DAB stained slides and the recommended
+            `cie_76` color difference method is `25`. For H&E slides,
+            it is advised to set this threshold to 0 as correctly stained H&E slides
+            stained with only one stain are not common.
 
         color_difference_method: Method used for computing the color difference
             between the detected vectors and reference vectors.
@@ -79,8 +86,8 @@ def staining_difference(
 
     img = immunohistochemistry()
 
-    result = dominant_stains(img=img)
-    stain1, stain2 = result["stain1"], result["stain2"]
+    stains = dominant_stains(img=img)
+    stain1, stain2 = stains["stain1"], stains["stain2"]
 
     result = staining_difference(
         ColorConversion.RGB2HDR, stain1, stain2, 33, 25, "ciede_2000", "cie_76"
