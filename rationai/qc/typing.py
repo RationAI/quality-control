@@ -14,6 +14,11 @@ RGBImage: TypeAlias = NDArray[np.uint8]
 Three channel RGB image represented by a numpy array.
 """
 
+GrayScaleImage: TypeAlias = NDArray[np.uint8]
+"""
+Single channel grayscale image represented by a numpy array.
+"""
+
 Stain: TypeAlias = NDArray[np.float64]
 """
 Single stain vector (of 3 values) represented by a numpy array.
@@ -76,3 +81,10 @@ class StainingDifference(TypedDict):
     """True if the stain values are close to the expected ones
     (i.e., their color difference is small enough).
     """
+
+
+class FocusScore(TypedDict):
+    """Dictionary containing the focus score mask."""
+
+    focus_score_piqe: GrayScaleImage
+    """Mask of the focus score."""
