@@ -9,6 +9,17 @@ from rationai.qc.typing import FocusScore, GrayScaleImage, RGBImage
 def _get_score_mask(
     grayscale_img: GrayScaleImage, activity_mask: GrayScaleImage
 ) -> GrayScaleImage:
+    """Creates a focus score mask based on the grayscale image and the piqe activity mask.
+
+    Args:
+        grayscale_img: Grayscale image of the tissue.
+        activity_mask: Grayscale image of piqe activity_mask.
+
+    Returns:
+        Focus score mask. Scores range from 0 to 1,
+        where 0 is the worst and 1 is the best.
+
+    """
     # TODO use standard tissue_mask library function instead
     foreground = grayscale_img <= 0.96
     foreground_area = np.sum(foreground)
@@ -42,6 +53,21 @@ def focus_score_piqe(img: RGBImage, pixel_size: float = 0.44) -> FocusScore:
         | Key                   | Description               |
         |-----------------------|---------------------------|
         | `focus_score_piqe`    | Mask of the focus score.  |
+
+    Examples:
+    ```python
+    from skimage.data import immunohistochemistry
+
+    from rationai.qc.focus import focus_score_piqe
+
+    img = immunohistochemistry()
+    pixel_size = 0.44  # pixel size of img in micrometers
+
+    result = focus_score_piqe(img, pixel_size)
+
+    score_mask = result["focus_score_piqe"]  # Mask of the focus score range from 0 to 1
+    ```
+
     """
     result: FocusScore = {}
 
