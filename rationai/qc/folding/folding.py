@@ -12,16 +12,16 @@ from rationai.staining import ColorConversion, convert_color
 def _get_threshold(
     img: NDArray[np.float32],
     mask: NDArray[bool],  # type: ignore[PGH003]
-    local_tiles: NDArray[np.float32] | None,
-    local_mask: NDArray[bool] | None,  # type: ignore[PGH003]
-):
+    local_tiles: NDArray[np.float32] | None = None,
+    local_mask: NDArray[bool] | None = None,  # type: ignore[PGH003]
+) -> float:
     """Calculates adequate threshold from given images.
 
     Args:
         img  : A given channel of an image.
         mask : Background mask of an image.
-        local_tiles : Optional n*n tiles in local neighbourhood of tile.
-        local_mask : Optional n*n background mask of local_tiles.
+        local_tiles : Optional n*n tiles in local neighbourhood of tile. Defaults to None.
+        local_mask : Optional n*n background mask of local_tiles. Defaults to None.
 
     Returns:
         Value which can be used to threshold the image.
