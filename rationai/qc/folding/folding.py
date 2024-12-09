@@ -50,7 +50,7 @@ def folding(
             should be as pixel-precise as possible.
         local_tiles: A local area surrounding the given tile.
         local_mask: Tissue mask of local_tiles.
-        nucleus_diameter_at_base_level: Diameter of the nucleus at the highest resolution.
+        nucleus_diameter_at_base_level: Diameter of the nucleus at the highest resolution level (typically level 0).
 
     Returns:
         Dictionary with a binary mask of folds.
