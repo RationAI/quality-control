@@ -146,9 +146,8 @@ In our example, the focus scores and masks look like this:
 
 In this example, we will work with the following images:
 
-![The input image](data/fold.png)
-
-![The input image local area](data/fold_area.png)
+<img src= "data/fold.png" alt="Input image" style="border: 2px solid grey;">
+<img src= "data/fold_area.png" alt="The input image local area" style="border: 2px solid grey;">
 
 The local area is an optional image. It increases the detection rate of particularly large folds. A suggested size is (3 * width, 3 * height) of investigated image
 
