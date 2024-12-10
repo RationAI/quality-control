@@ -27,8 +27,8 @@ def _get_threshold(
         Value which can be used to threshold the image.
     """
     if local_tiles is None:
-        return threshold_yen(MaskedArray(img, mask).compressed())
-    return threshold_yen(MaskedArray(local_tiles, local_mask).compressed())
+        return threshold_yen(MaskedArray(img, ~mask).compressed())
+    return threshold_yen(MaskedArray(local_tiles, ~local_mask).compressed())
 
 
 def folding(
@@ -84,7 +84,6 @@ def folding(
     result: QcValues = {}
 
     tile = img
-    mask = tissue_mask == 0
     hsv_tile = rgb2hsv(tile)
     saturation_channel, value_channel = hsv_tile[:, :, 1], hsv_tile[:, :, 2]
     local_saturation_channel, local_value_channel, local_eosin_channel = (
@@ -106,21 +105,21 @@ def folding(
                 local_tiles, ColorConversion.RGB2HER
             )
     else:
-        eosin_channel = np.ones_like(mask)
+        eosin_channel = np.ones_like(tissue_mask)
         if local_tiles is not None:
             local_eosin_channel = np.ones_like(local_tiles)
 
     inverted_value_channel = 1 - value_channel
 
     value_threshold = _get_threshold(
-        inverted_value_channel, mask, local_value_channel, local_mask
+        inverted_value_channel, tissue_mask, local_value_channel, local_mask
     )
     saturation_threshold = _get_threshold(
-        saturation_channel, mask, local_saturation_channel, local_mask
+        saturation_channel, tissue_mask, local_saturation_channel, local_mask
     )
     if hematoxylin_eosin_stained:
         eosin_threshold = _get_threshold(
-            eosin_channel, mask, local_eosin_channel, local_mask
+            eosin_channel, tissue_mask, local_eosin_channel, local_mask
         )
     else:
         eosin_threshold = 0
