@@ -127,13 +127,13 @@ After obtaining the results, we can save the computated focus score masks or jus
 
 #### Results
 Scores range from 0 to 1, where 1 represents the best focus.
-| Score        | focus          |
-|--------------------|-------------------|
-| 0.9+ | perfect/almost perfect focus|
-| 0.9 - 0.7 | slighty/partially blurred |
-| 0.7 - 0.4 | visibly blurred |
-| 0.4 - 0 | severely blurred |
 
+| Score        | Focus                     |
+|--------------|---------------------------|
+| 0.9+         | Perfect/almost perfect focus |
+| 0.9 - 0.7    | Slightly/partially blurred   |
+| 0.7 - 0.4    | Visibly blurred              |
+| 0.4 - 0      | Severely blurred             |
 
 
 In our example, the focus scores and masks look like this:
