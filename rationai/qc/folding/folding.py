@@ -5,13 +5,13 @@ from skimage.color import rgb2hsv
 from skimage.filters import threshold_yen
 from skimage.morphology import binary_opening, disk, reconstruction
 
-from rationai.qc.typing import QcValues, RGBImage
+from rationai.qc.typing import BinaryMask, FoldArtifacts, RGBImage
 from rationai.staining import ColorConversion, convert_color
 
 
 def _get_threshold(
     img: NDArray[np.float32],
-    mask: NDArray[bool],  # type: ignore[PGH003]
+    mask: BinaryMask,  # type: ignore[PGH003]
     local_tiles: NDArray[np.float32] | None = None,
     local_mask: NDArray[bool] | None = None,  # type: ignore[PGH003]
 ) -> float:
@@ -35,11 +35,11 @@ def folding(
     img: RGBImage,
     level_downsample: float,
     hematoxylin_eosin_stained: bool,
-    tissue_mask: NDArray[bool],  # type: ignore[PGH003]
-    local_tiles: NDArray[np.uint8] | None = None,
-    local_mask: NDArray[bool] | None = None,  # type: ignore[PGH003]
+    tissue_mask: BinaryMask,
+    local_tiles: RGBImage | None = None,
+    local_mask: BinaryMask | None = None,
     nucleus_diameter_at_base_level: int = 30,
-) -> QcValues:
+) -> FoldArtifacts:
     """Creates a binary mask of folding artifacts.
 
     Args:
@@ -81,8 +81,6 @@ def folding(
     ```
 
     """
-    result: QcValues = {}
-
     tile = img
     hsv_tile = rgb2hsv(tile)
     saturation_channel, value_channel = hsv_tile[:, :, 1], hsv_tile[:, :, 2]
@@ -128,10 +126,6 @@ def folding(
     thresholded_value = inverted_value_channel > value_threshold
     thresholded_eosin = eosin_channel > eosin_threshold
 
-    result["thresholded_saturation"] = thresholded_saturation
-    result["thresholded_value"] = thresholded_value
-    result["thresholded_eosin"] = thresholded_eosin
-
     if (
         np.sum(thresholded_value) * 2 > tile.size
         or np.sum(thresholded_saturation) * 2 > tile.size
@@ -146,7 +140,17 @@ def folding(
 
     if hematoxylin_eosin_stained:
         folding_test = reconstruction(folding_test_markers, thresholded_eosin)
-        result["folding"] = folding_test
+        result: FoldArtifacts = {
+            "folding": folding_test,
+            "thresholded_saturation": thresholded_saturation,
+            "thresholded_eosin": thresholded_eosin,
+            "thresholded_value": thresholded_value,
+        }
         return result
-    result["folding"] = folding_test_markers
+    result: FoldArtifacts = {
+        "folding": folding_test,
+        "thresholded_saturation": thresholded_saturation,
+        "thresholded_eosin": thresholded_eosin,
+        "thresholded_value": thresholded_value,
+    }
     return result

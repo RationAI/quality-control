@@ -1,4 +1,4 @@
-from typing import Any, TypeAlias, TypedDict
+from typing import TypeAlias, TypedDict
 
 import numpy as np
 from numpy.typing import NDArray
@@ -22,12 +22,6 @@ Single channel grayscale image represented by a numpy array.
 Stain: TypeAlias = NDArray[np.float64]
 """
 Single stain vector (of 3 values) represented by a numpy array.
-"""
-
-# TODO: Remove this type when it is no longer used by any function.
-QcValues: TypeAlias = dict[str, Any]
-"""
-Dictionary with values computed by a QC function.
 """
 
 
@@ -88,3 +82,19 @@ class FocusScore(TypedDict):
 
     focus_score_piqe: GrayScaleImage
     """Mask of the focus score."""
+
+
+class FoldArtifacts(TypedDict):
+    """Dictionary containing the fold detection mask and intermediate results."""
+
+    folding: BinaryMask
+    """Mask of the fold detection"""
+
+    thresholded_saturation: BinaryMask
+    """Thresholded saturation channel. Intermediate result of folding detection. Can be used for debugging."""
+
+    thresholded_value: BinaryMask
+    """Thresholded value channel.Intermediate result of folding detection. Can be used for debugging."""
+
+    thresholded_eosin: BinaryMask
+    """Thresholded eosin channel.Intermediate result of folding detection. Can be used for debugging."""
