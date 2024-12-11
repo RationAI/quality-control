@@ -33,24 +33,22 @@ def _get_threshold(
 
 def folding(
     img: RGBImage,
-    level_downsample: float,
+    mpp: float,
     hematoxylin_eosin_stained: bool,
     tissue_mask: BinaryMask,
     local_tiles: RGBImage | None = None,
     local_mask: BinaryMask | None = None,
-    nucleus_diameter_at_base_level: int = 30,
 ) -> FoldArtifacts:
     """Creates a binary mask of folding artifacts.
 
     Args:
         img: RGB image of the tissue.
-        level_downsample: Downsample at the level at which the image is provided.
+        mpp: Number of microns per pixel of image.
         hematoxylin_eosin_stained: True if image is stained using Hematoxylin and Eosin.
         tissue_mask: A mask, where the tissue is labeled 1 and the background 0,
             should be as pixel-precise as possible.
         local_tiles: A local area surrounding the given tile.
         local_mask: Tissue mask of local_tiles.
-        nucleus_diameter_at_base_level: Diameter of the nucleus at the highest resolution level (typically level 0).
 
     Returns:
         Dictionary with a binary mask of folds.
@@ -135,7 +133,7 @@ def folding(
 
     folding_test_markers = binary_opening(
         thresholded_eosin & thresholded_saturation & thresholded_value,
-        disk(nucleus_diameter_at_base_level // level_downsample),
+        disk(30 // (mpp / 0.22)),
     )
 
     if hematoxylin_eosin_stained:
