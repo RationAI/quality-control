@@ -38,6 +38,7 @@ def folding(
     tissue_mask: BinaryMask,
     local_tiles: RGBImage | None = None,
     local_mask: BinaryMask | None = None,
+    cell_nucleus_size: float = 7,
 ) -> FoldArtifacts:
     """Creates a binary mask of folding artifacts.
 
@@ -49,6 +50,9 @@ def folding(
             should be as pixel-precise as possible.
         local_tiles: A local area surrounding the given tile.
         local_mask: Tissue mask of local_tiles.
+        cell_nucleus_size: Cell nucleus size in microns. This value is used for morphological operations.
+            If estimating the value, it is better to overestimate the value.
+            The default value is 7 based on empirical observations.
 
     Returns:
         Dictionary with a binary mask of folds.
@@ -133,7 +137,7 @@ def folding(
 
     folding_test_markers = binary_opening(
         thresholded_eosin & thresholded_saturation & thresholded_value,
-        disk(30 // (mpp / 0.22)),
+        disk(cell_nucleus_size // (mpp)),
     )
 
     if hematoxylin_eosin_stained:
