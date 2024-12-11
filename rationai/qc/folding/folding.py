@@ -69,7 +69,7 @@ def folding(
     ```python
     from skimage.data import immunohistochemistry
 
-    from rationai.qc.folding.folding import folding
+    from rationai.qc import folding
 
 
     img = immunohistochemistry()
