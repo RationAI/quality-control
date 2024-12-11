@@ -186,12 +186,11 @@ Now we have all the arguments prepared. The folding function can be called:
 Now we can calculate the tissue masks:
 ```python linenums="1"
 artifacts = folding(img=img,
-                    level_downsample=8,
+                    mpp=1.76,
                     hematoxylin_eosin_stained=True,
                     tissue_mask=img_mask,
                     local_tiles=local_area_img,
-                    local_mask=img_area_mask,
-                    nucleus_diameter_at_base_level=30)
+                    local_mask=img_area_mask)
 ```
 The level_downsample argument is the downsample rate between the highest resolution level and the level from which the image was taken. nuclues_diameter_at_base_level specifies the nucleus diameter at the highest resolution level (it can be easily measured when browsing the WSI).
 
