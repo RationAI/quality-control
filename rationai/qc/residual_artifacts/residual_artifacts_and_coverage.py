@@ -61,7 +61,10 @@ def _get_debris_coverage(
     residual = np.asarray(
         convert_color(tile=img, conversion=conv)[res_index], dtype=np.float64
     )
-    residual_mask = residual >= threshold
+    # Experiments showed that if the color of a artifact substantially differs
+    # from the expected staining, negative values big in magnitude can be generated
+    # in the residual channel.
+    residual_mask = np.abs(residual) >= threshold
 
     # Remove artifacts smaller that a single nucleus
     residual_mask = area_opening(residual_mask, area_threshold=nucleus_area)
