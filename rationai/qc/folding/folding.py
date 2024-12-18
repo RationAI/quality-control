@@ -85,7 +85,6 @@ def folding(
     artifacts = folding(
         img=img,
         mpp=1.76,
-        hematoxylin_eosin_stained=True,
         tissue_mask=img_mask,
         local_tiles=local_area_img,
         local_mask=img_area_mask,
@@ -174,7 +173,7 @@ def folding(
     result: FoldArtifacts = {
         "folding": folding_test,
         "thresholded_saturation": thresholded_saturation,
-        "thresholded_eosin": e_channel,
+        "thresholded_eosin": thresholded_eosin,
         "thresholded_value": thresholded_value,
     }
 
