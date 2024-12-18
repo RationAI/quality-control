@@ -5,16 +5,32 @@ from skimage.morphology import area_opening, binary_opening, disk
 from rationai.qc.typing import BinaryMask, RGBImage
 
 
-def _generate_tissue_mask_based_on_intensity(img: RGBImage) -> BinaryMask:
+def _generate_tissue_mask_based_on_intensity(rgb_tile: RGBImage) -> BinaryMask:
+    """Generates a tissue mask based on the rgb intensities.
+
+    Args:
+        rgb_tile : RGB image of the tile.
+
+    Returns:
+        Tissue mask of the given tile.
+    """
     mask = np.logical_or(
-        np.logical_or(img[:, :, 0] < 230, img[:, :, 1] < 230),
-        img[:, :, 2] < 230,
+        np.logical_or(rgb_tile[:, :, 0] < 230, rgb_tile[:, :, 1] < 230),
+        rgb_tile[:, :, 2] < 230,
     )
     return mask
 
 
 def tearing(img: RGBImage) -> dict[str, BinaryMask]:
-    tissue_mask = binary_opening(_generate_tissue_mask_based_on_intensity(img), disk(2))
+    """Creates a binary mask of tissue tear artifacts.
+
+    Args:
+        img: RGB image of the tile.
+
+    Returns:
+        Dictionary with the key tearing test that contains the binary mask of detected tissue artifacts.
+    """
+    tissue_mask = _generate_tissue_mask_based_on_intensity(img)
 
     background_mask = ~tissue_mask
 
