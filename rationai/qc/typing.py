@@ -1,0 +1,100 @@
+from typing import TypeAlias, TypedDict
+
+import numpy as np
+from numpy.typing import NDArray
+
+
+BinaryMask: TypeAlias = NDArray[np.bool_]
+"""
+Binary mask only containing values 0 and 1.
+"""
+
+RGBImage: TypeAlias = NDArray[np.uint8]
+"""
+Three channel RGB image represented by a numpy array.
+"""
+
+GrayScaleImage: TypeAlias = NDArray[np.uint8]
+"""
+Single channel grayscale image represented by a numpy array.
+"""
+
+Stain: TypeAlias = NDArray[np.float64]
+"""
+Single stain vector (of 3 values) represented by a numpy array.
+"""
+
+
+class CorrectStaining(TypedDict):
+    """Dictionary containing answer if the slide is stained correctly."""
+
+    correct_staining: bool
+    """True if the differences are considered to be small enough
+    for a slide to be considered as correctly stained.
+    """
+
+    stain1_diff_median: float
+    """Median of differences for the first stain."""
+
+    stain2_diff_median: float
+    """Median of differences for the second stain."""
+
+
+class DominantStains(TypedDict):
+    """Dictionary containing two detected dominant stains."""
+
+    stain1: Stain
+    """First dominant stain vector."""
+
+    stain2: Stain
+    """Second dominant stain vector."""
+
+
+class ResidualArtifacts(TypedDict):
+    """Dictionary containing a coverage mask and a coverage number."""
+
+    coverage_mask: BinaryMask
+    """Binary mask of the detected residual artifacts."""
+
+    coverage: float
+    """A number that states what portion of the image's foreground area
+    is covered by the artifacts.
+    """
+
+
+class StainingDifference(TypedDict):
+    """Dictionary with color differences and a correct staining verdict."""
+
+    stain_diff1: float
+    """First stain difference."""
+
+    stain_diff2: float
+    """Second stain difference."""
+
+    correct_staining: bool
+    """True if the stain values are close to the expected ones
+    (i.e., their color difference is small enough).
+    """
+
+
+class FocusScore(TypedDict):
+    """Dictionary containing the focus score mask."""
+
+    focus_score_piqe: GrayScaleImage
+    """Mask of the focus score."""
+
+
+class FoldArtifacts(TypedDict):
+    """Dictionary containing the fold detection mask and intermediate results."""
+
+    folding: BinaryMask
+    """Mask of the fold detection"""
+
+    thresholded_saturation: BinaryMask
+    """Thresholded saturation channel. Intermediate result of folding detection. Can be used for debugging."""
+
+    thresholded_value: BinaryMask
+    """Thresholded value channel.Intermediate result of folding detection. Can be used for debugging."""
+
+    thresholded_eosin: BinaryMask
+    """Thresholded eosin channel.Intermediate result of folding detection. Can be used for debugging."""
