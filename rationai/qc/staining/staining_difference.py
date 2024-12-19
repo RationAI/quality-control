@@ -1,0 +1,122 @@
+from rationai.qc.staining.color_difference import (
+    closest_difference,
+    color_difference,
+    reference_stain,
+)
+from rationai.qc.typing import Stain, StainingDifference
+from rationai.staining import ColorConversion
+
+
+def staining_difference(
+    conversion: ColorConversion,
+    stain1: Stain,
+    stain2: Stain,
+    local_threshold: float,
+    single_stain_threshold: float,
+    color_difference_method: str = "ciede_2000",
+    single_stain_difference_method: str = "cie_76",
+) -> StainingDifference:
+    """Decides if the given stains are close engough to the reference stains.
+
+    Args:
+        conversion: First two stains of this conversion specify
+            the reference stains.
+
+        stain1: First dominant stain.
+
+        stain2: Second dominant stain.
+
+        local_threshold: Threshold that determines if the specified stains
+            are close enough to the expected stains.
+            Suitable values for this threshold and the recommended `ciede_2000`
+            difference method can be in the [20, 35] interval, depending on the staining
+            and desired level of strictness.
+
+        single_stain_threshold: Threshold that determines if `stain1` and `stain2`
+            are too close to eachother. If so, the region in which the stains were
+            detected is assumed to be stained only by a single stain and the second
+            color difference is set to 0.
+            Currently recommended value for H&DAB stained slides and the recommended
+            `cie_76` color difference method is `25`. For H&E slides,
+            it is advised to set this threshold to 0 as correctly stained H&E slides
+            stained with only one stain are not common.
+
+        color_difference_method: Method used for computing the color difference
+            between the detected vectors and reference vectors.
+            Options: `ciede_2000`, `ciede_94`, `cie_76`.
+            For most cases, the `ciede_2000` method is recommended.
+
+        single_stain_difference_method: Method used for computing the color difference
+            between the two detected stain vectors in order to determine
+            if the tissue is only stained by a single stain.
+            Options: `ciede_2000`, `ciede_94`, `cie_76`.
+            For most cases, the `cie_76` method is recommended.
+
+    Note:
+        According to our empirical analysis, `ciede_2000` method
+        provides the most stable results for the typical use case.
+        This use case mainly includes determining the color difference
+        between a detected and reference stain vectors.
+        On the other hand, `cie_76` proved to be useful for computing
+        the difference between two detected stains in order to determine
+        if the stain vectors could resemble the same stain.
+
+        All of the color difference functions, and their properties
+        can be found on <a href="https://en.wikipedia.org/wiki/Color_difference#">Wikipedia</a>.
+
+    Returns:
+        Dictionary with color differences and a correct staining verdict.
+
+    Note:
+        The returned dictionary contains the following values:
+
+        | Key                   | Description                                                                                               |
+        |-----------------------|-----------------------------------------------------------------------------------------------------------|
+        | `stain_diff1`         | First stain difference.                                                                                   |
+        | `stain_diff2`         | Second stain difference.                                                                                  |
+        | `correct_staining`    | True if the stain values are close to the expected ones (i.e., their color difference is small enough).   |
+
+    Examples:
+    ```python
+    from skimage.data import immunohistochemistry
+
+    from rationai.qc.staining import dominant_stains, staining_difference
+    from rationai.staining import ColorConversion
+
+
+    img = immunohistochemistry()
+
+    stains = dominant_stains(img=img)
+    stain1, stain2 = stains["stain1"], stains["stain2"]
+
+    result = staining_difference(
+        ColorConversion.RGB2HDR, stain1, stain2, 33, 25, "ciede_2000", "cie_76"
+    )
+    print(result["correct_staining"])
+    print(result["stain_diff1"], result["stain_diff2"])
+    ```
+    """
+    ref1 = reference_stain(conversion=conversion, index=0)
+    ref2 = reference_stain(conversion=conversion, index=1)
+
+    diff1, diff2 = closest_difference(
+        stain1, stain2, ref1, ref2, color_difference_method
+    )
+
+    if (
+        color_difference(stain1, stain2, method=single_stain_difference_method)
+        < single_stain_threshold
+    ):
+        # The detected dominant stains are too close, they probably came from a region
+        # stained with only one stain. Therefore, no color the difference is computed
+        # for the second stain.
+        diff1 = min(diff1, diff2)
+        diff2 = 0.0
+
+    result: StainingDifference = {
+        "stain_diff1": diff1,
+        "stain_diff2": diff2,
+        "correct_staining": (diff1 + diff2) < local_threshold,
+    }
+
+    return result
