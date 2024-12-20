@@ -15,7 +15,6 @@ dependencies = [
     "numpy==1.26.4",
     "rationai-staining @ git+ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
     "opencv-python>=4.10.0.84",
-    "NRVQA @ git+https://github.com/vvfvfvfv/NRVQA.git",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
 ]
 
