@@ -17,9 +17,7 @@ repos:
     hooks:
       # Run the linter.
       - id: ruff
-        exclude: "piqe.py"
         entry: pdm lint --force-exclude
       # Run the formatter.
       - id: ruff-format
-        exclude: "piqe.py"
         entry: pdm format --force-exclude
