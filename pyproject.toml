@@ -14,7 +14,6 @@ dependencies = [
     "pyvips>=2.2.3",
     "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
     "opencv-python>=4.10.0.84",
-    "NRVQA @ git+https://github.com/vvfvfvfv/NRVQA.git",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
 ]
 
