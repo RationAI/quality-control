@@ -1,10 +1,10 @@
 import numpy as np
 import pyvips
-from piqe import piqe
 from skimage.color import rgb2gray
 from skimage.filters import median
 
 from rationai.masks import tissue_mask
+from rationai.qc.focus.piqe import piqe
 from rationai.qc.typing import FocusScore, GrayScaleImage, NDArray, RGBImage
 
 
