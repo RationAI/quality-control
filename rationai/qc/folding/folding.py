@@ -27,6 +27,79 @@ def _get_mean_std_from_hist(n: NDArray[np.uint32], bins: NDArray[np.int32]):
     return mean, std
 
 
+def folding_algorithm(
+    img: RGBImage,
+    mpp: float,
+    cell_nucleus_size: float,
+    tissue_mask: BinaryMask,
+    local_eosin_histogram: NDArray[np.uint32],
+    local_saturation_histogram: NDArray[np.uint32],
+    local_value_histogram: NDArray[np.uint32],
+) -> FoldArtifacts:
+    mask = tissue_mask == 0
+    _, e_channel, _ = convert_color(img, ColorConversion.RGB2HER)
+    hsv = rgb2hsv(img)
+    saturation_channel, value_channel = hsv[:, :, 1], hsv[:, :, 2]
+
+    inverted_value_channel = 1 - value_channel
+
+    bins = np.linspace(0, 1, 257)
+
+    saturation_threshold = threshold_yen(hist=(local_saturation_histogram, bins))
+    eosin_threshold = threshold_yen(hist=(local_eosin_histogram, bins))
+    value_threshold = threshold_yen(hist=(local_value_histogram, bins))
+
+    thresholded_saturation = saturation_channel > saturation_threshold
+    thresholded_eosin = e_channel > eosin_threshold
+    thresholded_value = inverted_value_channel > value_threshold
+
+    number_of_foreground_pixels = np.sum(tissue_mask)
+
+    eosin_values, _ = np.histogram(MaskedArray(e_channel, mask).compressed(), bins=bins)
+
+    current_mean, _ = _get_mean_std_from_hist(eosin_values, bins)
+    local_mean_without_center = 1
+    local_std_without_center = 1
+    if np.all(local_eosin_histogram >= eosin_values) and np.any(
+        local_eosin_histogram > eosin_values
+    ):
+        local_mean_without_center, local_std_without_center = _get_mean_std_from_hist(
+            local_eosin_histogram - eosin_values, bins
+        )
+
+    if not (current_mean > local_mean_without_center + local_std_without_center):
+        if np.sum(thresholded_saturation) * 2 > number_of_foreground_pixels:
+            thresholded_saturation = np.zeros_like(mask)
+        if np.sum(thresholded_value) * 2 > number_of_foreground_pixels:
+            thresholded_saturation = np.zeros_like(mask)
+        if np.sum(thresholded_eosin) * 2 > number_of_foreground_pixels:
+            thresholded_eosin = np.zeros_like(mask)
+
+    folding_test_markers = binary_opening(
+        thresholded_eosin & thresholded_saturation & thresholded_value,
+        disk(cell_nucleus_size // mpp),
+    )
+
+    folding_test = reconstruction(folding_test_markers, thresholded_eosin)
+
+    labeled_img, num_of_labels = label(folding_test, return_num=True)
+
+    for i in range(1, num_of_labels):
+        labeled_region = labeled_img == i
+        if np.sum(
+            binary_closing(labeled_region, disk(5 * cell_nucleus_size / mpp))
+        ) > 1.5 * np.sum(labeled_region):
+            labeled_img[labeled_img == i] = 0
+
+    folding_test = labeled_img > 0
+    return {
+        "folding": folding_test,
+        "thresholded_saturation": thresholded_saturation,
+        "thresholded_eosin": thresholded_eosin,
+        "thresholded_value": thresholded_value,
+    }
+
+
 def folding(
     img: RGBImage,
     mpp: float,
@@ -94,13 +167,6 @@ def folding(
     ```
 
     """
-    cell_nucleus_size_in_img = cell_nucleus_size / mpp
-
-    _, e_channel, _ = convert_color(img, ColorConversion.RGB2HER)
-    hsv = rgb2hsv(img)
-    saturation_channel, value_channel = hsv[:, :, 1], hsv[:, :, 2]
-    inverted_value_channel = 1 - value_channel
-
     hsv_local_tiles = rgb2hsv(local_tiles)
     local_saturation_channel, local_value_channel = (
         hsv_local_tiles[:, :, 1],
@@ -110,71 +176,22 @@ def folding(
 
     bins = np.linspace(0, 1, 257)
 
-    local_saturation_histogram = np.histogram(
+    local_saturation_histogram, _ = np.histogram(
         MaskedArray(local_saturation_channel, ~local_mask).compressed(), bins
     )
-    local_value_histogram = np.histogram(
+    local_value_histogram, _ = np.histogram(
         MaskedArray(1 - local_value_channel, ~local_mask).compressed(), bins
     )
-    local_eosin_histogram = np.histogram(
+    local_eosin_histogram, _ = np.histogram(
         MaskedArray(local_eosin_channel, ~local_mask).compressed(), bins
     )
 
-    saturation_threshold = threshold_yen(hist=local_saturation_histogram)
-    eosin_threshold = threshold_yen(hist=local_eosin_histogram)
-    value_threshold = threshold_yen(hist=local_value_histogram)
-
-    thresholded_saturation = saturation_channel > saturation_threshold
-    thresholded_eosin = e_channel > eosin_threshold
-    thresholded_value = inverted_value_channel > value_threshold
-
-    number_of_foreground_pixels = np.sum(tissue_mask)
-
-    eosin_values, _ = np.histogram(
-        MaskedArray(e_channel, ~tissue_mask).compressed(), bins=bins
+    return folding_algorithm(
+        img,
+        mpp,
+        cell_nucleus_size,
+        tissue_mask,
+        local_eosin_histogram,
+        local_saturation_histogram,
+        local_value_histogram,
     )
-
-    current_mean, _ = _get_mean_std_from_hist(eosin_values, bins)
-    local_mean_without_center = 1
-    local_std_without_center = 1
-    if np.all(local_eosin_histogram[0] >= eosin_values) and np.any(
-        local_eosin_histogram[0] > eosin_values
-    ):
-        local_mean_without_center, local_std_without_center = _get_mean_std_from_hist(
-            local_eosin_histogram[0] - eosin_values, bins
-        )
-
-    if not (current_mean > local_mean_without_center + local_std_without_center):
-        if np.sum(thresholded_saturation) * 2 > number_of_foreground_pixels:
-            thresholded_saturation = np.zeros_like(tissue_mask)
-        if np.sum(thresholded_value) * 2 > number_of_foreground_pixels:
-            thresholded_saturation = np.zeros_like(tissue_mask)
-        if np.sum(thresholded_eosin) * 2 > number_of_foreground_pixels:
-            thresholded_eosin = np.zeros_like(tissue_mask)
-
-    folding_test_markers = binary_opening(
-        thresholded_eosin & thresholded_saturation & thresholded_value,
-        disk(cell_nucleus_size_in_img),
-    )
-
-    reconstructed_markers = reconstruction(folding_test_markers, thresholded_eosin)
-
-    labeled_img, num_of_labels = label(reconstructed_markers, return_num=True)
-
-    for i in range(1, num_of_labels):
-        labeled_region = labeled_img == i
-        if np.sum(
-            binary_closing(labeled_region, disk(cell_nucleus_size_in_img * 5))
-        ) > 1.5 * np.sum(labeled_region):
-            labeled_img[labeled_img == i] = 0
-
-    folding_test = labeled_img > 0
-
-    result: FoldArtifacts = {
-        "folding": folding_test,
-        "thresholded_saturation": thresholded_saturation,
-        "thresholded_eosin": thresholded_eosin,
-        "thresholded_value": thresholded_value,
-    }
-
-    return result
