@@ -88,3 +88,19 @@ class FocusScore(TypedDict):
 
     focus_score_piqe: GrayScaleImage
     """Mask of the focus score."""
+
+
+class FoldArtifacts(TypedDict):
+    """Dictionary containing the fold detection mask and intermediate results."""
+
+    folding: BinaryMask
+    """Mask of the fold detection"""
+
+    thresholded_saturation: BinaryMask
+    """Thresholded saturation channel. Intermediate result of folding detection. Can be used for debugging."""
+
+    thresholded_value: BinaryMask
+    """Thresholded value channel.Intermediate result of folding detection. Can be used for debugging."""
+
+    thresholded_eosin: BinaryMask
+    """Thresholded eosin channel.Intermediate result of folding detection. Can be used for debugging."""

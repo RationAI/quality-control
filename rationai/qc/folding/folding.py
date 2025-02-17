@@ -6,7 +6,7 @@ from skimage.filters import threshold_yen
 from skimage.measure import label
 from skimage.morphology import binary_closing, binary_opening, disk, reconstruction
 
-from rationai.qc.typing import QcValues, RGBImage
+from rationai.qc.typing import BinaryMask, FoldArtifacts, RGBImage
 from rationai.staining import ColorConversion, convert_color
 
 
@@ -134,7 +134,9 @@ def folding(
             should be as pixel-precise as possible.
         local_tiles: A local area surrounding the given tile.
         local_mask: Tissue mask of local_tiles.
-        nucleus_diameter_at_base_level: Diameter of the nucleus at the highest resolution level (typically level 0).
+        cell_nucleus_size: Cell nucleus size in microns. This value is used for morphological operations.
+            If estimating the value, it is better to overestimate the value.
+            The default value is 7 based on empirical observations.
 
     Returns:
         Dictionary with a binary mask of folds.
