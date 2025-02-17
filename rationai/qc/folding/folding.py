@@ -36,6 +36,23 @@ def folding_algorithm(
     local_saturation_histogram: NDArray[np.uint32],
     local_value_histogram: NDArray[np.uint32],
 ) -> FoldArtifacts:
+    """Calculates the folding algorithm with the preprepared values.
+
+    Args:
+        img : RGB image of the tissue.
+        mpp : Number of microns per pixel of image.
+        cell_nucleus_size : Cell nucleus size in microns. This value is used for morphological operations.
+            If estimating the value, it is better to overestimate the value.
+            The default value is 7 based on empirical observations.
+        tissue_mask : A mask, where the tissue is labeled 1 and the background 0,
+            should be as pixel-precise as possible.
+        local_eosin_histogram : Histogram of the eosin channel of the surrounding tiles.
+        local_saturation_histogram : _Histogram of the saturation channel of the surrounding tiles.
+        local_value_histogram : Histogram of the value channel of the surrounding tiles.
+
+    Returns:
+        Dictionary with a binary mask of folds.
+    """
     mask = tissue_mask == 0
     _, e_channel, _ = convert_color(img, ColorConversion.RGB2HER)
     hsv = rgb2hsv(img)
