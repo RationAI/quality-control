@@ -54,10 +54,10 @@ mask.save("residual_mask.png")
 print("Coverage Number:", artifacts["coverage"])
 ```
 
-The computed mask is returned as a binary image. Therefore, the computed values need to be scaled into the [0, 255] range before visualization.
+The computed mask is returned as a binary image. Therefore, the computed values need to be scaled into the `[0, 255]` range before visualization.
 
 #### Results
-In our example, the `coverage` number came out to be `0.0766`, meaning that little more than 7% of the image's foreground area is covered by the artifact.
+In our example, the `coverage` number came out to be `0.0766`, meaning that **little more than 7% of the image's foreground area** is covered by the artifact.
 Finally, the computed artifact mask looks like this:
 
 ![The generated mask](data/residual_mask.png)
@@ -78,8 +78,9 @@ import numpy as np
 from PIL import Image
 from rationai.staining import ColorConversion
 
-# optional, tissue mask will be calculated inside the focus_score function if not provided as an argument
 import pyvips
+# optional, tissue mask will be calculated inside the focus_score function
+# if not provided as an argument
 from rationai.masks import tissue_mask
 
 
@@ -90,7 +91,7 @@ img_c = np.asarray(Image.open("focus_C.png").convert("RGB")) # Blurred image
 
 Next, we will need to prepare the arguments for the [out_of_focus](../api/focus/focus-score-piqe.md) function and call it on the input images:
 
-```python linenums="9"
+```python linenums="15"
 pixel_size = 0.44 # pixel size of input images in micrometers
 
 # focus score without tissue mask
@@ -100,7 +101,7 @@ focus_score_b = focus_score_piqe(img_b, pixel_size)
 # focus score with tissue mask
 tissue_mask = tissue_mask(
         pyvips.Image.new_from_array(img_c), mpp=pixel_size
-    ).numpy()
+).numpy()
 
 tissue_mask  = (tissue_mask  > 0).astype(int) # binarize mask
               
@@ -111,7 +112,7 @@ The `pixel_size` parameter is used to calculate the kernel size for median filte
 
 After obtaining the results, we can save the computated focus score masks or just print out any value from the score mask for quick inspection: 
 
-```python linenums="18"
+```python linenums="30"
 
     print(focus_score_a["focus_score_piqe"][0][0])
 
@@ -171,7 +172,7 @@ local_area_image =img_area = np.asarray(Image.open("fold_area.png").convert("RGB
 ```
 
 Now we can calculate the tissue masks:
-```python linenums="1"
+```python linenums="11"
 img_mask = tissue_mask(
         pyvips.Image.new_from_array(img), mpp=pixel_size).numpy() > 0
 
@@ -180,11 +181,7 @@ img_area_mask = tissue_mask(
 ```
 
 Now we have all the arguments prepared. The folding function can be called:
-
-```
-
-Now we can calculate the tissue masks:
-```python linenums="1"
+```python linenums="17"
 artifacts = folding(img=img,
                     level_downsample=8,
                     hematoxylin_eosin_stained=True,
@@ -193,12 +190,12 @@ artifacts = folding(img=img,
                     local_mask=img_area_mask,
                     nucleus_diameter_at_base_level=30)
 ```
-The level_downsample argument is the downsample rate between the highest resolution level and the level from which the image was taken. nuclues_diameter_at_base_level specifies the nucleus diameter at the highest resolution level (it can be easily measured when browsing the WSI).
+The `level_downsample` argument is the downsample rate between the highest resolution level and the level from which the image was taken. The `nuclues_diameter_at_base_level` argument specifies the nucleus diameter at the highest resolution level (it can be easily measured when browsing the WSI).
 
 #### Results
-To recover the results, one need to access the dictionary `artifacts`.
+To recover the results, one needs to access the `artifacts` dictionary.
 
-```python linenums="1"
+```python linenums="25"
 mask = Image.fromarray(255 * artifacts["folding"].astype(np.uint8))
 ```
 ![The resulting mask](data/fold_detection.png)
