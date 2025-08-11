@@ -1,4 +1,3 @@
-# ruff: noqa
 # This file, piqe.py, was taken from a public repository on GitHub.
 # Original source: https://github.com/buyizhiyou/NRVQA
 
