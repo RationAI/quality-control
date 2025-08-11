@@ -51,15 +51,18 @@ class DominantStains(TypedDict):
 
 
 class ResidualArtifacts(TypedDict):
-    """Dictionary containing a coverage mask and a coverage number."""
+    """Dictionary containing a coverage mask and a number of examined and flagged pixels."""
 
     coverage_mask: BinaryMask
     """Binary mask of the detected residual artifacts."""
 
-    coverage: float
-    """A number that states what portion of the image's foreground area
-    is covered by the artifacts.
+    number_of_examined_pixels: int
+    """Number of pixels that were examined by the function and could
+    be theoretically marked as artifacts.
     """
+
+    number_of_flagged_pixels: int
+    """Number of pixels that were labeled as artifacts by the function."""
 
 
 class StainingDifference(TypedDict):

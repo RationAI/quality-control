@@ -39,7 +39,7 @@ def _get_debris_coverage(
     nucleus_area: float,
     res_index: int,
     threshold: float,
-) -> tuple[float, BinaryMask]:
+) -> tuple[int, int, BinaryMask]:
     """Calculates the percentage of the foreground debris coverage.
 
     Args:
@@ -55,8 +55,8 @@ def _get_debris_coverage(
             slightly higher values could also provide reasonable results.
 
     Returns:
-        Number of pixels marked as artifact compared to number
-            of foreground pixels and thresholded residual channel.
+        Number of foreground pixels examined, number of foreground pixels
+            marked as artifact, and the thresholded residual channel.
     """
     residual = np.asarray(
         convert_color(tile=img, conversion=conv)[res_index], dtype=np.float64
@@ -73,11 +73,9 @@ def _get_debris_coverage(
     residual_mask *= foreground_mask
 
     if foreground_area <= 0:
-        return 0.0, residual_mask
+        return 0, 0, residual_mask
 
-    return float(
-        round(np.count_nonzero(residual_mask) / foreground_area, 4)
-    ), residual_mask
+    return foreground_area, np.count_nonzero(residual_mask), residual_mask
 
 
 def residual_artifacts_and_coverage(
@@ -102,15 +100,17 @@ def residual_artifacts_and_coverage(
             slightly higher values could also provide reasonable results.
 
     Returns:
-        Dictionary with a binary coverage mask and a coverage number.
+        Dictionary with a number of examined pixels, number of flagged pixels,
+            and a binary coverage mask.
 
     Note:
         The returned dictionary contains the following values:
 
-        | Key               | Description                                                                                   |
-        |-------------------|-----------------------------------------------------------------------------------------------|
-        | `coverage_mask`   | Binary mask of the detected residual artifacts.                                               |
-        | `coverage`        | A number that states what portion of the image's foreground area is covered by the artifacts. |
+        | Key                         | Description                                           |
+        |-----------------------------|-------------------------------------------------------|
+        | `coverage_mask`             | Binary mask of the detected residual artifacts.       |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
     Examples:
     ```python
@@ -127,10 +127,10 @@ def residual_artifacts_and_coverage(
     )
 
     mask = result["coverage_mask"]  # Contains values 0 and 1
-    print(result["coverage"])
+    print(result["number_of_flagged_pixels"], result["number_of_examined_pixels"])
     ```
     """
-    coverage, cov_heatmap = _get_debris_coverage(
+    num_examined, num_flagged, cov_heatmap = _get_debris_coverage(
         img=img,
         conv=conversion,
         nucleus_area=nucleus_area,
@@ -140,7 +140,8 @@ def residual_artifacts_and_coverage(
 
     result: ResidualArtifacts = {
         "coverage_mask": cov_heatmap,
-        "coverage": coverage,
+        "number_of_examined_pixels": num_examined,
+        "number_of_flagged_pixels": num_flagged,
     }
 
     return result
