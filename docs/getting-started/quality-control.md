@@ -52,13 +52,15 @@ After obtaining the results, we can save the binary artifact mask and print the 
 mask = Image.fromarray(255 * artifacts["coverage_mask"].astype(np.uint8))
 mask.save("residual_mask.png")
 
-print("Coverage Number:", artifacts["coverage"])
+print(f"Number of flagged pixels: {artifacts["number_of_flagged_pixels"]}")
+print(f"Number of examined pixels: {artifacts["number_of_examined_pixels"]}")
 ```
 
 The computed mask is returned as a binary image. Therefore, the computed values need to be scaled into the [0, 255] range before visualization.
 
 #### Results
-In our example, the `coverage` number came out to be `0.0766`, meaning that little more than 7% of the image's foreground area is covered by the artifact.
+In our example, 17900 out of the 233744 examined pixels were labeled as artifacts,
+meaning that little more than 7% of the image's foreground area is covered by artifacts.
 Finally, the computed artifact mask looks like this:
 
 ![The generated mask](data/residual_mask.png)
