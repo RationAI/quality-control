@@ -1,10 +1,9 @@
-# ruff: noqa
+# ruff: noqa: N806, N803, N802, F841
 # This file, piqe.py, was taken from a public repository on GitHub.
 # Original source: https://github.com/buyizhiyou/NRVQA
 
-import numpy as np
 import cv2
-from scipy.special import gamma
+import numpy as np
 
 
 def calculate_mscn(dis_image):

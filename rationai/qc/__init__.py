@@ -1,4 +1,6 @@
-from rationai.qc.focus.focus_score_piqe import focus_score_piqe
+from rationai.qc.blur.blur_score_laplacian import blur_score_laplacian
+from rationai.qc.blur.blur_score_piqe import blur_score_piqe
+from rationai.qc.blur.blur_score_roberts import blur_score_roberts
 from rationai.qc.folding.folding import folding
 from rationai.qc.residual_artifacts import residual_artifacts_and_coverage
 from rationai.qc.staining import (
@@ -9,8 +11,10 @@ from rationai.qc.staining import (
 
 
 __all__ = [
+    "blur_score_laplacian",
+    "blur_score_piqe",
+    "blur_score_roberts",
     "dominant_stains",
-    "focus_score_piqe",
     "folding",
     "is_slide_correctly_stained",
     "residual_artifacts_and_coverage",

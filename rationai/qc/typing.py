@@ -77,11 +77,16 @@ class StainingDifference(TypedDict):
     """
 
 
-class FocusScore(TypedDict):
-    """Dictionary containing the focus score mask."""
+class BlurScore(TypedDict):
+    """Dictionary containing the blur score masks."""
 
-    focus_score_piqe: GrayScaleImage
-    """Mask of the focus score."""
+    blur_score_per_pixel: BinaryMask
+    """Binary mask composed of 16x16 px blocks marking blurred area"""
+
+    blur_score_coverage: NDArray[np.float64]
+    """Coverage mask of the blur score. Coverage ranges from 0.0 to 1.0.
+    0.0 - no blur, 1.0 - full blur
+    """
 
 
 class FoldArtifacts(TypedDict):
