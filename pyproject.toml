@@ -5,8 +5,9 @@ description = ""
 authors = [
     { name = "Erik Sedlák", email = "521008@mail.muni.cz" },
     { name = "Tomáš Balák", email = "525126@mail.muni.cz" },
+    { name = "Samuel Tichý", email = "524626@mail.muni.cz" },
 ]
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.11"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [

@@ -7,7 +7,7 @@ nav:
       - Quality Control Functions: getting-started/quality-control.md
 
   - API Reference:
-      - focus_score_piqe: api/focus/focus-score-piqe.md
+      - blur_score_piqe: api/blur/blur-score-piqe.md
       - folding: api/folding/folding.md
       - residual_artifacts_and_coverage: api/residual_artifacts/residual-artifacts-and-coverage.md
       - staining:
