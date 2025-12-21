@@ -13,7 +13,7 @@ license = { file = "LICENSE" }
 dependencies = [
     "scikit-image>=0.24.0",
     "pyvips>=2.2.3",
-    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@feature/normalize-staining",
+    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@refactor/color-conversion",
     "opencv-python>=4.10.0.84",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
 ]
