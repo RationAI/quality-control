@@ -1,12 +1,12 @@
 import numpy as np
 from numpy.ma import MaskedArray
 from numpy.typing import NDArray
+from rationai.staining import StandardConversions, convert_color
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_yen
 from skimage.morphology import binary_opening, disk, reconstruction
 
 from rationai.qc.typing import BinaryMask, FoldArtifacts, RGBImage
-from rationai.staining import ColorConversion, convert_color
 
 
 def _get_threshold(
@@ -99,10 +99,10 @@ def folding(
         )
         local_value_channel = 1 - local_value_channel
     if hematoxylin_eosin_stained:
-        _, eosin_channel, _ = convert_color(tile, ColorConversion.RGB2HER)
+        _, eosin_channel, _ = convert_color(tile, StandardConversions.RGB2HER)
         if local_tiles is not None:
             _, local_eosin_channel, _ = convert_color(
-                local_tiles, ColorConversion.RGB2HER
+                local_tiles, StandardConversions.RGB2HER
             )
     else:
         eosin_channel = np.ones_like(tissue_mask)

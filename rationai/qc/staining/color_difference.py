@@ -1,9 +1,9 @@
 import numpy as np
 from numpy.typing import NDArray
+from rationai.staining import ColorConversion, ConversionDirection
 from skimage.color import deltaE_cie76, deltaE_ciede94, deltaE_ciede2000, rgb2lab
 
 from rationai.qc.typing import Stain
-from rationai.staining import ColorConversion, ConversionType
 
 
 def _stain2rgb(stain: Stain) -> NDArray[np.float64]:
@@ -13,10 +13,10 @@ def _stain2rgb(stain: Stain) -> NDArray[np.float64]:
 
 def reference_stain(conversion: ColorConversion, index: int) -> Stain:
     """Return specified stain vector for a given conversion."""
-    if conversion.conv_type == ConversionType.RGB2STAIN:
+    if conversion.direction == ConversionDirection.RGB2STAIN:
         conversion = conversion.inverse
 
-    return np.array(conversion.value[0][index], dtype=np.float64)
+    return conversion.matrix[index]
 
 
 def color_difference(
