@@ -1,11 +1,12 @@
 [project]
 name = "rationai-qc"
-version = "1.0.0"
+version = "1.0.1"
 description = ""
 authors = [
+    { name = "Tomáš Balák", email = "tomasbalak@mail.muni.cz" },
     { name = "Erik Sedlák", email = "521008@mail.muni.cz" },
-    { name = "Tomáš Balák", email = "525126@mail.muni.cz" },
     { name = "Samuel Tichý", email = "524626@mail.muni.cz" },
+    { name = "Karel Štěpka", email = "chuckie@mail.muni.cz" },
 ]
 requires-python = ">=3.11"
 readme = "README.md"
