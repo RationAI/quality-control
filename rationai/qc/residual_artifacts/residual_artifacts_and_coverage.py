@@ -1,8 +1,8 @@
 import numpy as np
+from rationai.staining import ColorConversion, convert_color
 from skimage.morphology import area_opening
 
 from rationai.qc.typing import BinaryMask, ResidualArtifacts, RGBImage
-from rationai.staining import ColorConversion, convert_color
 
 
 def _get_foreground_mask(
@@ -117,13 +117,13 @@ def residual_artifacts_and_coverage(
     from skimage.data import immunohistochemistry
 
     from rationai.qc import residual_artifacts_and_coverage
-    from rationai.staining import ColorConversion
+    from rationai.staining import StandardConversions
 
 
     img = immunohistochemistry()
 
     result = residual_artifacts_and_coverage(
-        img, ColorConversion.RGB2HDR, nucleus_area=150, res_index=2, threshold=0.013
+        img, StandardConversions.RGB2HDR, nucleus_area=150, res_index=2, threshold=0.013
     )
 
     mask = result["coverage_mask"]  # Contains values 0 and 1
