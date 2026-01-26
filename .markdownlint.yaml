@@ -2,3 +2,5 @@ MD013: false  # Line length
 MD023: false  # Heading start left
 MD024: false  # Duplicate headings
 MD033: false  # Inline HTML
+MD041: false  # First line in file should be a top level heading
+MD046: false  # Fenced code blocks
