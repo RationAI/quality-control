@@ -13,25 +13,16 @@ license = { file = "LICENSE" }
 dependencies = [
     "scikit-image>=0.24.0",
     "pyvips>=2.2.3",
-    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
+    "rationai-staining",
     "opencv-python>=4.10.0.84",
-    "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
+    "rationai-masks",
 ]
 
-[tool.pdm.dev-dependencies]
+[tool.uv.sources]
+rationai-masks = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git" }
+rationai-staining = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git" }
+
+[dependency-groups]
 dev = ["mypy", "pre-commit", "ruff"]
 test = ["pytest", "pytest-cov"]
 docs = ["mkdocs-material>=9.5.32", "mkdocstrings[python]>=0.25.2"]
-
-[tool.pdm.scripts]
-l = { composite = ["lint", "format", "mypy"] }
-test = "pytest tests"
-lint = "ruff check --fix"
-format = "ruff format"
-mypy = "mypy ."
-docs = "mkdocs serve"
-post_install = { composite = [
-    "pre-commit autoupdate",
-    "pre-commit install",
-    "pre-commit install --hook-type commit-msg",
-] }
