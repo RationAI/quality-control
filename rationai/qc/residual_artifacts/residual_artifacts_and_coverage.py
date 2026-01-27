@@ -75,7 +75,7 @@ def _get_debris_coverage(
     if foreground_area <= 0:
         return 0, 0, residual_mask
 
-    return foreground_area, np.count_nonzero(residual_mask), residual_mask
+    return int(foreground_area), int(np.count_nonzero(residual_mask)), residual_mask
 
 
 def residual_artifacts_and_coverage(
