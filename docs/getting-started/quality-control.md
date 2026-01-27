@@ -76,9 +76,9 @@ Finally, the computed artifact mask looks like this:
 
 In this example, we will work with the following images:
 
-| ![](data/blur/blur_A.png) | ![](data/blur/blur_B.png) | ![](data/blur/blur_C.png) |
-|:-------------------------:|:------------------------:|:------------------------:|
-| Focused Image                | Partially blurred Image               | Blurred Image               |
+| ![Focused Image](data/blur/blur_A.png) | ![Partially Blurred Image](data/blur/blur_B.png) | ![Blurred Image](data/blur/blur_C.png) |
+|:--------------------------------------:|:------------------------------------------------:|:--------------------------------------:|
+| Focused Image                          | Partially Blurred Image                          | Blurred Image                          |
 
 First, we need to import the necessary functionality and load the images into numpy arrays:
 
@@ -118,11 +118,11 @@ blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask )
 
 The `pixel_size` parameter is used to calculate the kernel size for median filter that is used during the computation. Function gives most accurate results on images with pixel size around 0.44 micrometers. The `tissue_mask` param is optional and will be calculated inside the function if not present, but can be provided by the user to avoid unnecessary computation.
 
-blur function outputs 2 masks - blur_score_coverage and blur_score_per_pixel.
-blur_score_per_pixel is a binary mask marking the areas of the image that are considered blurred, while blur_score_coverage provides a blur coverage score for the whole image indicating the degree of blur.
+The blur function outputs 2 masks - `blur_score_coverage` and `blur_score_per_pixel`.
+`blur_score_per_pixel` is a binary mask marking the areas of the image that are considered blurred, while `blur_score_coverage` provides a blur coverage score for the whole image indicating the degree of blur.
 
 After obtaining the results, we can save the computated blur score masks.
-Since blur_score_coverage is homogeneous across the image, we can just print out any value from the score mask for quick inspection:
+Since `blur_score_coverage` is homogeneous across the image, we can just print out any value from the score mask for quick inspection:
 
 ```python linenums="29"
 
@@ -156,8 +156,8 @@ mask.save("blur_score_c_pixel.png")
 
 Coverage scores range from 0 to 1, where 0 represents the best focus and 1 represents complete blur.
 
-| Score        | Focus Level                |
-|--------------|---------------------------|
+| Score        | Focus Level                  |
+|--------------|------------------------------|
 | 0 - 0.1      | Perfect/almost perfect focus |
 | 0.1 - 0.3    | Slightly/partially blurred   |
 | 0.3 - 0.7    | Visibly blurred              |
@@ -165,16 +165,16 @@ Coverage scores range from 0 to 1, where 0 represents the best focus and 1 repre
 
 In our example, the focus scores and masks look like this:
 
-| ![](data/blur/blur_score_a.png) | ![](data/blur/blur_score_b.png) | ![](data/blur/blur_score_c.png) |
-|:-------------------------:|:------------------------:|:------------------------:|
-| Focused image, Score ~0.005                | Partially blurred image, Score ~0.488               | Blurred image, Score ~0.985              |
+| ![Focused Image](data/blur/blur_score_a.png) | ![Partially Blurred Image](data/blur/blur_score_b.png) | ![Blurred Image](data/blur/blur_score_c.png) |
+|:--------------------------------------------:|:------------------------------------------------------:|:--------------------------------------------:|
+| Focused Image, Score ~0.005                  | Partially Blurred Image, Score ~0.488                  | Blurred Image, Score ~0.985                  |
 
 Per-pixel mask is binary mask composed of 16x16 px blocks marking blurred areas.
 Background pixels and focused blocks are marked as 0, while blurred blocks are marked as 1.
 
-| ![](data/blur/blur_score_a_pixel.png) | ![](data/blur/blur_score_b_pixel.png) | ![](data/blur/blur_score_c_pixel.png) |
-|:-------------------------:|:------------------------:|:------------------------:|
-| Focused image                | Partially blurred image             | Blurred image             |
+| ![Focused Image](data/blur/blur_score_a_pixel.png) | ![Partially Blurred Image](data/blur/blur_score_b_pixel.png) | ![Blurred Image](data/blur/blur_score_c_pixel.png) |
+|:--------------------------------------------------:|:------------------------------------------------------------:|:--------------------------------------------------:|
+| Focused Image                                      | Partially Blurred Image                                      | Blurred Image                                      |
 
 Please note that blocks of the per-pixel mask may be 1 not only for globally blurred regions, but also for locally defocused or sparse areas (e.g. tissue gaps or empty regions). This means a value of 1 does not always imply a complete blur.
 
