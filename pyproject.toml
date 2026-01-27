@@ -21,7 +21,7 @@ dependencies = [
 
 [tool.uv.sources]
 rationai-masks = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git" }
-rationai-staining = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git", branch = "refactor/color-conversion" }
+rationai-staining = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git" }
 
 [dependency-groups]
 dev = ["mypy", "pre-commit", "ruff"]
