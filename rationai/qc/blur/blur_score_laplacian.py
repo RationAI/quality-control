@@ -1,7 +1,8 @@
 import numpy as np
+from rationai.staining import StandardConversions, convert_color
 from skimage.color import rgb2gray
 from skimage.filters import laplace, threshold_otsu
-from skimage.morphology import binary_dilation, binary_erosion
+from skimage.morphology.binary import binary_dilation, binary_erosion
 
 from rationai.qc.blur.utils import (
     get_coverage_mask,
@@ -9,8 +10,6 @@ from rationai.qc.blur.utils import (
     simple_foreground_mask,
 )
 from rationai.qc.typing import BinaryMask, BlurScore, RGBImage
-from rationai.staining import convert_color
-from rationai.staining.convert_color import ColorConversion
 
 
 def blur_score_laplacian(
@@ -74,7 +73,7 @@ def blur_score_laplacian(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
-    hematoxylin, _, _ = convert_color(img, ColorConversion.RGB2HER)
+    hematoxylin, _, _ = convert_color(img, StandardConversions.RGB2HER)
 
     hematoxylin_threshold = threshold_otsu(hematoxylin)
     hematoxylin_mask = hematoxylin > hematoxylin_threshold
@@ -90,15 +89,15 @@ def blur_score_laplacian(
     )
 
     blur_score = np.abs(gradient)
-    blur_score_per_pixel = masked_average_pooling(blur_score, pooling_mask)
+    blur_score_pooled = masked_average_pooling(blur_score, pooling_mask)
 
     # Threshold was set to 5 based on empirical testing
     # Can be adjusted based on the desired sensitivity
     # Higher threshold means more pixels are considered blurred
-    blur_score_per_pixel = blur_score_per_pixel < threshold
+    blur_score_per_pixel = blur_score_pooled < threshold
 
     # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel = blur_score_per_pixel * foreground_mask
+    blur_score_per_pixel *= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,

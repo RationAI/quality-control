@@ -72,17 +72,17 @@ def blur_score_roberts(
     gaussian_gradient = roberts(gaussian(grayscale_img, sigma=1))
 
     blur_score = np.abs(gradient - gaussian_gradient)
-    blur_score_per_pixel = masked_average_pooling(
+    blur_score_pooled = masked_average_pooling(
         arr=blur_score, foreground_mask=foreground_mask
     )
 
     # Threshold was set to 2 based on empirical testing
     # Can be adjusted based on the desired sensitivity
     # Higher threshold means more pixels are considered blurred
-    blur_score_per_pixel = blur_score_per_pixel < threshold
+    blur_score_per_pixel = blur_score_pooled < threshold
 
     # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel = blur_score_per_pixel * foreground_mask
+    blur_score_per_pixel *= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,

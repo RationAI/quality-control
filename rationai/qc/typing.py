@@ -19,6 +19,11 @@ GrayScaleImage: TypeAlias = NDArray[np.uint8]
 Single channel grayscale image represented by a numpy array.
 """
 
+FloatingPointImage: TypeAlias = NDArray[np.float64]
+"""
+Floating point image represented by a numpy array.
+"""
+
 Stain: TypeAlias = NDArray[np.float64]
 """
 Single stain vector (of 3 values) represented by a numpy array.
