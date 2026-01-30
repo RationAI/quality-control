@@ -6,3 +6,18 @@ regions and they **offer a straightforward and well-documented access** to the k
 of the complete QC methods to allow for easier debugging and experimenting.
 
 ## [Documentation](https://rationai.gitlab-pages.ics.muni.cz/digital-pathology/quality-control/quality-control/)
+
+## Setting up a Development Environment
+
+1. Create the development environment (including all optional and development dependencies):
+
+    ```bash
+    uv sync --all-groups
+    ```
+
+2. Install pre-commit hooks:
+
+    ```bash
+    uv run pre-commit install
+    uv run pre-commit install --hook-type commit-msg
+    ```
