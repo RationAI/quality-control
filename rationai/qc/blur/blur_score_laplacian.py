@@ -45,10 +45,12 @@ def blur_score_laplacian(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                   | Description                     |
-        |-----------------------|---------------------------------|
-        | `blur_score_per_pixel`| Binary mask of the blur score.  |
-        | `blur_score_coverage` | Coverage mask of the blur score.|
+        | Key                         | Description                                           |
+        |-----------------------------|-------------------------------------------------------|
+        | `blur_score_per_pixel`      | Binary mask of the blur score.                        |
+        | `blur_score_coverage`       | Coverage mask of the blur score.                      |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
     Examples:
     ```python
@@ -106,4 +108,6 @@ def blur_score_laplacian(
             detection_mask=blur_score_per_pixel,
             foreground_mask=foreground_mask,
         ),
+        "number_of_examined_pixels": int(np.count_nonzero(foreground_mask)),
+        "number_of_flagged_pixels": int(np.count_nonzero(blur_score_per_pixel)),
     }

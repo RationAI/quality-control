@@ -96,6 +96,14 @@ class BlurScore(TypedDict):
     0.0 - no blur, 1.0 - full blur
     """
 
+    number_of_examined_pixels: int
+    """Number of pixels that were examined by the function and could
+    be theoretically marked as artifacts.
+    """
+
+    number_of_flagged_pixels: int
+    """Number of pixels that were labeled as artifacts by the function."""
+
 
 class FoldArtifacts(TypedDict):
     """Dictionary containing the fold detection mask and intermediate results."""
