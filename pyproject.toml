@@ -11,18 +11,14 @@ authors = [
 requires-python = ">=3.11"
 readme = "README.md"
 license = { file = "LICENSE" }
+
 dependencies = [
     "scikit-image>=0.24.0",
     "pyvips>=2.2.3",
-    # "rationai-staining",
-    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@refactor/color-conversion",
     "opencv-python>=4.10.0.84",
-    "rationai-masks",
+    "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
+    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@refactor/color-conversion",
 ]
-
-[tool.uv.sources]
-rationai-masks = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git" }
-# rationai-staining = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git" }
 
 [dependency-groups]
 dev = ["mypy", "pre-commit", "ruff"]
