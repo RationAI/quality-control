@@ -4,16 +4,16 @@ from numpy.typing import NDArray
 from rationai.staining import StandardConversions, convert_color
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_yen
-from skimage.morphology import binary_opening, disk, reconstruction
+from skimage.morphology import disk, opening, reconstruction
 
 from rationai.qc.typing import BinaryMask, FoldArtifacts, RGBImage
 
 
 def _get_threshold(
-    img: NDArray[np.float32],
-    mask: BinaryMask,  # type: ignore[PGH003]
-    local_tiles: NDArray[np.float32] | None = None,
-    local_mask: NDArray[bool] | None = None,  # type: ignore[PGH003]
+    img: NDArray[np.float64],
+    mask: BinaryMask,
+    local_tiles: NDArray[np.float64] | None = None,
+    local_mask: BinaryMask | None = None,
 ) -> float:
     """Calculates adequate threshold from given images.
 
@@ -26,9 +26,9 @@ def _get_threshold(
     Returns:
         Value which can be used to threshold the image.
     """
-    if local_tiles is None:
-        return threshold_yen(MaskedArray(img, ~mask).compressed())
-    return threshold_yen(MaskedArray(local_tiles, ~local_mask).compressed())
+    if local_tiles is not None and local_mask is not None:
+        return threshold_yen(MaskedArray(local_tiles, ~local_mask).compressed())
+    return threshold_yen(MaskedArray(img, ~mask).compressed())
 
 
 def folding(
@@ -107,7 +107,7 @@ def folding(
     else:
         eosin_channel = np.ones_like(tissue_mask)
         if local_tiles is not None:
-            local_eosin_channel = np.ones_like(local_tiles)
+            local_eosin_channel = np.ones_like(local_tiles, dtype=np.float64)
 
     inverted_value_channel = 1 - value_channel
 
@@ -117,7 +117,7 @@ def folding(
     saturation_threshold = _get_threshold(
         saturation_channel, tissue_mask, local_saturation_channel, local_mask
     )
-    if hematoxylin_eosin_stained:
+    if hematoxylin_eosin_stained and eosin_channel is not None:
         eosin_threshold = _get_threshold(
             eosin_channel, tissue_mask, local_eosin_channel, local_mask
         )
@@ -135,24 +135,22 @@ def folding(
     ):
         thresholded_value = np.zeros(tile.shape)
 
-    folding_test_markers = binary_opening(
+    folding_test_markers = opening(
         thresholded_eosin & thresholded_saturation & thresholded_value,
         disk(cell_nucleus_size // (mpp)),
     )
 
     if hematoxylin_eosin_stained:
         folding_test = reconstruction(folding_test_markers, thresholded_eosin)
-        result: FoldArtifacts = {
+        return {
             "folding": folding_test,
             "thresholded_saturation": thresholded_saturation,
             "thresholded_eosin": thresholded_eosin,
             "thresholded_value": thresholded_value,
         }
-        return result
-    result: FoldArtifacts = {
+    return {
         "folding": folding_test,
         "thresholded_saturation": thresholded_saturation,
         "thresholded_eosin": thresholded_eosin,
         "thresholded_value": thresholded_value,
     }
-    return result
