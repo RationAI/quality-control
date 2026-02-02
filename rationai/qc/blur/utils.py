@@ -2,8 +2,7 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
-from skimage.morphology import area_opening
-from skimage.morphology.binary import binary_erosion
+from skimage.morphology import area_opening, erosion
 
 from rationai.qc.typing import BinaryMask, FloatingPointImage
 
@@ -107,6 +106,6 @@ def simple_foreground_mask(
     foreground_mask = grayscale_img < threshold
 
     foreground_mask = area_opening(foreground_mask)
-    foreground_mask = binary_erosion(foreground_mask, footprint=np.ones((5, 5)))
+    foreground_mask = erosion(foreground_mask, footprint=np.ones((5, 5)))
 
     return foreground_mask

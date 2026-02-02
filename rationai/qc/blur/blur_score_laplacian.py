@@ -2,7 +2,7 @@ import numpy as np
 from rationai.staining import StandardConversions, convert_color
 from skimage.color import rgb2gray
 from skimage.filters import laplace, threshold_otsu
-from skimage.morphology.binary import binary_dilation, binary_erosion
+from skimage.morphology import dilation, erosion
 
 from rationai.qc.blur.utils import (
     get_coverage_mask,
@@ -86,8 +86,8 @@ def blur_score_laplacian(
     # 2 pixels wide border is removed from the pooling mask for each hematoxylin nucleus
     # to ignore gradient values on the edges of the nuclei
     pooling_mask = foreground_mask * ~(
-        binary_dilation(hematoxylin_mask, footprint=footprint)
-        ^ binary_erosion(hematoxylin_mask, footprint=footprint)
+        dilation(hematoxylin_mask, footprint=footprint)
+        ^ erosion(hematoxylin_mask, footprint=footprint)
     )
 
     blur_score = np.abs(gradient)
