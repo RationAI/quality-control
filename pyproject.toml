@@ -17,7 +17,7 @@ dependencies = [
     "pyvips>=2.2.3",
     "opencv-python>=4.10.0.84",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
-    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@refactor/color-conversion",
+    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
 ]
 
 [dependency-groups]
