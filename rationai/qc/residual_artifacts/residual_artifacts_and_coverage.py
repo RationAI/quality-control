@@ -101,14 +101,14 @@ def residual_artifacts_and_coverage(
 
     Returns:
         Dictionary with a number of examined pixels, number of flagged pixels,
-            and a binary coverage mask.
+            and a binary mask of artifacts.
 
     Note:
         The returned dictionary contains the following values:
 
         | Key                         | Description                                           |
         |-----------------------------|-------------------------------------------------------|
-        | `coverage_mask`             | Binary mask of the detected residual artifacts.       |
+        | `artifacts_per_pixel`       | Binary mask of the detected residual artifacts.       |
         | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
         | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
@@ -126,7 +126,7 @@ def residual_artifacts_and_coverage(
         img, StandardConversions.RGB2HDR, nucleus_area=150, res_index=2, threshold=0.013
     )
 
-    mask = result["coverage_mask"]  # Contains values 0 and 1
+    mask = result["artifacts_per_pixel"]  # Contains values 0 and 1
     print(result["number_of_flagged_pixels"], result["number_of_examined_pixels"])
     ```
     """
@@ -139,7 +139,7 @@ def residual_artifacts_and_coverage(
     )
 
     result: ResidualArtifacts = {
-        "coverage_mask": cov_heatmap,
+        "artifacts_per_pixel": cov_heatmap,
         "number_of_examined_pixels": num_examined,
         "number_of_flagged_pixels": num_flagged,
     }

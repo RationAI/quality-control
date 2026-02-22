@@ -58,7 +58,7 @@ class DominantStains(TypedDict):
 class ResidualArtifacts(TypedDict):
     """Dictionary containing a coverage mask and a number of examined and flagged pixels."""
 
-    coverage_mask: BinaryMask
+    artifacts_per_pixel: BinaryMask
     """Binary mask of the detected residual artifacts."""
 
     number_of_examined_pixels: int
@@ -91,7 +91,7 @@ class BlurScore(TypedDict):
     blur_score_per_pixel: BinaryMask
     """Binary mask composed of 16x16 px blocks marking blurred area"""
 
-    blur_score_coverage: NDArray[np.float64]
+    blur_score_coverage: FloatingPointImage
     """Coverage mask of the blur score. Coverage ranges from 0.0 to 1.0.
     0.0 - no blur, 1.0 - full blur
     """
@@ -108,14 +108,28 @@ class BlurScore(TypedDict):
 class FoldArtifacts(TypedDict):
     """Dictionary containing the fold detection mask and intermediate results."""
 
-    folding: BinaryMask
+    folding_per_pixel: BinaryMask
     """Mask of the fold detection"""
 
     thresholded_saturation: BinaryMask
-    """Thresholded saturation channel. Intermediate result of folding detection. Can be used for debugging."""
+    """Thresholded saturation channel. Intermediate result of folding detection.
+    Can be used for debugging.
+    """
 
     thresholded_value: BinaryMask
-    """Thresholded value channel.Intermediate result of folding detection. Can be used for debugging."""
+    """Thresholded value channel. Intermediate result of folding detection.
+    Can be used for debugging.
+    """
 
     thresholded_eosin: BinaryMask
-    """Thresholded eosin channel.Intermediate result of folding detection. Can be used for debugging."""
+    """Thresholded eosin channel. Intermediate result of folding detection.
+    Can be used for debugging.
+    """
+
+    number_of_examined_pixels: int
+    """Number of pixels that were examined by the function and could
+    be theoretically marked as artifacts.
+    """
+
+    number_of_flagged_pixels: int
+    """Number of pixels that were labeled as artifacts by the function."""

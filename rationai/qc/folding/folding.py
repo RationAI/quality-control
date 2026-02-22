@@ -60,12 +60,14 @@ def folding(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                       | Description                           |
-        |---------------------------|---------------------------------------|
-        | `folding`                 | Binary mask of the detected folds.    |
-        | `thresholded_saturation`  |                                       |
-        | `thresholded_value`       |                                       |
-        | `thresholded_eosin`       |                                       |
+        | Key                         | Description                                           |
+        |-----------------------------|-------------------------------------------------------|
+        | `folding_per_pixel`         | Binary mask of the detected folds.                    |
+        | `thresholded_saturation`    |                                                       |
+        | `thresholded_value`         |                                                       |
+        | `thresholded_eosin`         |                                                       |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
     Examples:
     ```python
@@ -79,7 +81,7 @@ def folding(
 
     result = folding(img, 8, False, tissue_mask)
 
-    mask = result["folding"]  # Contains values 0 and 1
+    mask = result["folding_per_pixel"]  # Contains values 0 and 1
     ```
 
     """
@@ -140,17 +142,23 @@ def folding(
         disk(cell_nucleus_size // (mpp)),
     )
 
+    examined_pixels = np.count_nonzero(tissue_mask)
+
     if hematoxylin_eosin_stained:
         folding_test = reconstruction(folding_test_markers, thresholded_eosin)
         return {
-            "folding": folding_test,
+            "folding_per_pixel": folding_test,
             "thresholded_saturation": thresholded_saturation,
             "thresholded_eosin": thresholded_eosin,
             "thresholded_value": thresholded_value,
+            "number_of_examined_pixels": int(examined_pixels),
+            "number_of_flagged_pixels": int(np.count_nonzero(folding_test)),
         }
     return {
-        "folding": folding_test,
+        "folding_per_pixel": folding_test,
         "thresholded_saturation": thresholded_saturation,
         "thresholded_eosin": thresholded_eosin,
         "thresholded_value": thresholded_value,
+        "number_of_examined_pixels": int(examined_pixels),
+        "number_of_flagged_pixels": int(np.count_nonzero(folding_test)),
     }
