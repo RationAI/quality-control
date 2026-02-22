@@ -23,4 +23,8 @@ dependencies = [
 [dependency-groups]
 dev = ["mypy", "pre-commit", "ruff"]
 test = ["pytest", "pytest-cov"]
-docs = ["mkdocs-material>=9.5.32", "mkdocstrings[python]>=0.25.2"]
+docs = [
+    "mkdocs-material>=9.5.32",
+    "mkdocstrings[python]>=0.25.2",
+    "pymdown-extensions>=10.20.1",
+]

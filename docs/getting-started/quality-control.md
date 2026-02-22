@@ -55,7 +55,7 @@ Since the tissue is stained with the **H&E protocol**, we used the `RGB2HER` col
 After obtaining the results, we can save the binary artifact mask and print the number of examined and flagged pixels:
 
 ```python linenums="19"
-mask = Image.fromarray(255 * artifacts["coverage_mask"].astype(np.uint8))
+mask = Image.fromarray(255 * artifacts["artifacts_per_pixel"].astype(np.uint8))
 mask.save("residual_mask.png")
 
 print(f"Number of flagged pixels: {artifacts["number_of_flagged_pixels"]}")
@@ -237,7 +237,7 @@ The `level_downsample argument` is the downsample rate between the highest resol
 To recover the results, one needs to access the `artifacts` dictionary.
 
 ```python linenums="24"
-mask = Image.fromarray(255 * artifacts["folding"].astype(np.uint8))
+mask = Image.fromarray(255 * artifacts["folding_per_pixel"].astype(np.uint8))
 ```
 
 ![The resulting mask](data/fold_detection.png)

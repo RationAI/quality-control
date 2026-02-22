@@ -1720,6 +1720,7 @@ dev = [
 docs = [
     { name = "mkdocs-material" },
     { name = "mkdocstrings", extra = ["python"] },
+    { name = "pymdown-extensions" },
 ]
 test = [
     { name = "pytest" },
@@ -1744,6 +1745,7 @@ dev = [
 docs = [
     { name = "mkdocs-material", specifier = ">=9.5.32" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.25.2" },
+    { name = "pymdown-extensions", specifier = ">=10.20.1" },
 ]
 test = [
     { name = "pytest" },
