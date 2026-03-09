@@ -2,7 +2,7 @@ fix = true
 line-length = 88
 target-version = "py311"
 
-extend-exclude = ["rationai/qc/focus/piqe.py"]
+extend-exclude = ["rationai/qc/blur/piqe.py"]
 
 [format]
 # Enable reformatting of code snippets in docstrings.
