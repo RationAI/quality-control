@@ -25,13 +25,13 @@
     === "uv"
 
         ```bash
-        uv add git+https://gitlab.ics.muni.cz/rationai/digital-pathology/quality-control/quality-control.git
+        uv add git+https://github.com/RationAI/quality-control.git
         ```
 
     === "pip"
 
         ```bash
-        pip install git+https://gitlab.ics.muni.cz/rationai/digital-pathology/quality-control/quality-control.git
+        pip install git+https://github.com/RationAI/quality-control.git
         ```
 
 Once **pyvips**, and the core library are installed, you're ready to start using QC functions.
