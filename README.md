@@ -5,7 +5,9 @@ for QC methods** developed at RationAI. These functions are meant to be run on s
 regions and they **offer a straightforward and well-documented access** to the key parts
 of the complete QC methods to allow for easier debugging and experimenting.
 
-## [Documentation](https://rationai.gitlab-pages.ics.muni.cz/digital-pathology/quality-control/quality-control/)
+## Documentation
+
+**[`RationAI Quality Control`](https://rationai.github.io/quality-control/)**
 
 ## Setting up a Development Environment
 
