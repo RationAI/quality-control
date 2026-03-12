@@ -23,6 +23,7 @@
     You can install the core library using one of the following methods, depending on your package manager:
 
     === "uv"
+        (*Note that this command assumes an existing uv project.*)
 
         ```bash
         uv add git+https://github.com/RationAI/quality-control.git

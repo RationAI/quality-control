@@ -27,7 +27,6 @@ First, we need to import the necessary functionality and load the image into num
 ```python linenums="1"
 import numpy as np
 from PIL import Image
-
 from rationai.qc import residual_artifacts_and_coverage
 from rationai.staining import StandardConversions
 
@@ -38,7 +37,7 @@ img = np.asarray(Image.open("input.png").convert("RGB"))
 Next, we will need to prepare the arguments for the [residual_artifacts_and_coverage](../api/residual_artifacts/residual-artifacts-and-coverage.md)
 function and call it on the input image:
 
-```python linenums="10"
+```python linenums="9"
 
 conversion = StandardConversions.RGB2HER
 nucleus_area = 150
@@ -54,12 +53,12 @@ Since the tissue is stained with the **H&E protocol**, we used the `RGB2HER` col
 
 After obtaining the results, we can save the binary artifact mask and print the number of examined and flagged pixels:
 
-```python linenums="19"
+```python linenums="18"
 mask = Image.fromarray(255 * artifacts["artifacts_per_pixel"].astype(np.uint8))
 mask.save("residual_mask.png")
 
-print(f"Number of flagged pixels: {artifacts["number_of_flagged_pixels"]}")
-print(f"Number of examined pixels: {artifacts["number_of_examined_pixels"]}")
+print(f"Number of flagged pixels: {artifacts['number_of_flagged_pixels']}")
+print(f"Number of examined pixels: {artifacts['number_of_examined_pixels']}")
 ```
 
 The computed mask is returned as a binary image. Therefore, the computed values need to be scaled into the `[0, 255]` range before visualization.
@@ -84,12 +83,10 @@ First, we need to import the necessary functionality and load the images into nu
 
 ```python linenums="1"
 import numpy as np
-from PIL import Image
-
-# optional, tissue mask will be calculated inside the blur_score function
-# if not provided as an argument
 import pyvips
+from PIL import Image
 from rationai.masks import tissue_mask
+from rationai.qc import blur_score_piqe
 
 
 img_a = np.asarray(Image.open("blur_A.png").convert("RGB")) # Focused image
@@ -99,21 +96,21 @@ img_c = np.asarray(Image.open("blur_C.png").convert("RGB")) # Blurred image
 
 Next, we will need to prepare the arguments for the [blur_score_piqe](../api/blur/blur-score-piqe.md) function and call it on the input images:
 
-```python linenums="14"
+```python linenums="12"
 pixel_size = 0.44 # pixel size of input images in micrometers
 
 # blur score without tissue mask
 blur_score_a = blur_score_piqe(img_a, pixel_size)
 blur_score_b = blur_score_piqe(img_b, pixel_size)
 
-# blur score with tissue mask
 tissue_mask = tissue_mask(
         pyvips.Image.new_from_array(img_c), mpp=pixel_size
 ).numpy()
 
-tissue_mask  = (tissue_mask  > 0).astype(int) # binarize mask
+tissue_mask = (tissue_mask > 0).astype(int) # binarize mask
 
-blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask )
+# blur score with tissue mask
+blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask)
 ```
 
 The `pixel_size` parameter is used to calculate the kernel size for median filter that is used during the computation. Function gives most accurate results on images with pixel size around 0.44 micrometers. The `tissue_mask` param is optional and will be calculated inside the function if not present, but can be provided by the user to avoid unnecessary computation.
@@ -198,45 +195,45 @@ First, we need to import the necessary functionality and load the images into nu
 
 ```python linenums="1"
 import numpy as np
-from PIL import Image
-
 import pyvips
+from PIL import Image
 from rationai.masks import tissue_mask
+from rationai.qc import folding
 
 
-img = np.asarray(Image.open("fold.png").convert("RGB")) # Investigated image
-local_area_image =img_area = np.asarray(Image.open("fold_area.png").convert("RGB")) # Local area of investigated image
+mpp = 1.76
+img = np.asarray(Image.open("fold.png").convert("RGB"))  # Investigated image
+local_area_image = np.asarray(Image.open("fold_area.png").convert("RGB"))  # Local area of investigated image
 ```
 
 Now we can calculate the tissue masks:
 
-```python linenums="11"
+```python linenums="12"
 img_mask = tissue_mask(
-        pyvips.Image.new_from_array(img), mpp=pixel_size).numpy() > 0
+        pyvips.Image.new_from_array(img), mpp=mpp
+).numpy() > 0
 
 img_area_mask = tissue_mask(
-        pyvips.Image.new_from_array(local_area_img), mpp=pixel_size).numpy() > 0
+        pyvips.Image.new_from_array(local_area_image), mpp=mpp
+).numpy() > 0
 ```
 
 Now we have all the arguments prepared. The folding function can be called:
 
-```python linenums="17"
+```python linenums="20"
 artifacts = folding(img=img,
-                    mpp=1.76,
+                    mpp=mpp,
                     hematoxylin_eosin_stained=True,
                     tissue_mask=img_mask,
-                    local_tiles=local_area_img,
+                    local_tiles=local_area_image,
                     local_mask=img_area_mask)
 ```
-
-The `level_downsample argument` is the downsample rate between the highest resolution level and the level from which the image was taken.
-`nuclues_diameter_at_base_level` specifies the nucleus diameter at the highest resolution level (it can be easily measured when browsing the WSI).
 
 #### Results
 
 To recover the results, one needs to access the `artifacts` dictionary.
 
-```python linenums="24"
+```python linenums="27"
 mask = Image.fromarray(255 * artifacts["folding_per_pixel"].astype(np.uint8))
 ```
 
