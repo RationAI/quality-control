@@ -1,7 +1,7 @@
 # Using the Provided Quality Control Functions
 
 This document presents several examples of using the provided QC functions. These examples
-should provide you with good overview of the offered functionality and potential limitations.
+should provide you with a good overview of the offered functionality and potential limitations.
 
 ## Suggested Workflow
 
@@ -113,7 +113,9 @@ tissue_mask = (tissue_mask > 0).astype(int) # binarize mask
 blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask)
 ```
 
-The `pixel_size` parameter is used to calculate the kernel size for median filter that is used during the computation. Function gives most accurate results on images with pixel size around 0.44 micrometers. The `tissue_mask` param is optional and will be calculated inside the function if not present, but can be provided by the user to avoid unnecessary computation.
+The `pixel_size` parameter is used to calculate the kernel size for median filter that is used during the computation.
+The function gives most accurate results on images with pixel size around 0.44 micrometers.
+The `tissue_mask` param is optional and will be calculated inside the function if not present, but can be provided by the user to avoid unnecessary computation.
 
 The blur function outputs 2 masks - `blur_score_coverage` and `blur_score_per_pixel`.
 `blur_score_per_pixel` is a binary mask marking the areas of the image that are considered blurred, while `blur_score_coverage` provides a blur coverage score for the whole image indicating the degree of blur.
@@ -187,7 +189,7 @@ The local area of the tile.
 
 ![Local area around tile](data/fold_area.png)
 
-The local area is an optional image. It increases the detection rate of particularly large folds. A suggested size is `(3 * width, 3 * height)` of investigated image
+The local area is an optional image. It increases the detection rate of particularly large folds. A suggested size is `(3 * width, 3 * height)` of the investigated image.
 
 #### Sample Code
 
