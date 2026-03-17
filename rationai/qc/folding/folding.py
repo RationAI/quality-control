@@ -18,17 +18,28 @@ def _get_threshold(
     """Calculates adequate threshold from given images.
 
     Args:
-        img  : A given channel of an image.
-        mask : Background mask of an image.
-        local_tiles : Optional n*n tiles in local neighbourhood of tile. Defaults to None.
-        local_mask : Optional n*n background mask of local_tiles. Defaults to None.
+        img: A given channel of an image.
+        mask: Background mask of an image.
+        local_tiles: Optional n*n tiles in local neighbourhood of tile. Defaults to None.
+        local_mask: Optional n*n background mask of local_tiles. Defaults to None.
 
     Returns:
         Value which can be used to threshold the image.
     """
     if local_tiles is not None and local_mask is not None:
-        return threshold_yen(MaskedArray(local_tiles, ~local_mask).compressed())
-    return threshold_yen(MaskedArray(img, ~mask).compressed())
+        local_values = MaskedArray(local_tiles, ~local_mask).compressed()
+
+        if local_values.size > 0:
+            return threshold_yen(local_values)
+        else:
+            return 1.0
+
+    values = MaskedArray(img, ~mask).compressed()
+
+    if values.size == 0:
+        return 1.0
+
+    return threshold_yen(values)
 
 
 def folding(
@@ -142,23 +153,16 @@ def folding(
         disk(cell_nucleus_size // (mpp)),
     )
 
-    examined_pixels = np.count_nonzero(tissue_mask)
-
     if hematoxylin_eosin_stained:
         folding_test = reconstruction(folding_test_markers, thresholded_eosin)
-        return {
-            "folding_per_pixel": folding_test,
-            "thresholded_saturation": thresholded_saturation,
-            "thresholded_eosin": thresholded_eosin,
-            "thresholded_value": thresholded_value,
-            "number_of_examined_pixels": int(examined_pixels),
-            "number_of_flagged_pixels": int(np.count_nonzero(folding_test)),
-        }
+    else:
+        folding_test = folding_test_markers
+
     return {
         "folding_per_pixel": folding_test,
         "thresholded_saturation": thresholded_saturation,
         "thresholded_eosin": thresholded_eosin,
         "thresholded_value": thresholded_value,
-        "number_of_examined_pixels": int(examined_pixels),
+        "number_of_examined_pixels": int(np.count_nonzero(tissue_mask)),
         "number_of_flagged_pixels": int(np.count_nonzero(folding_test)),
     }
