@@ -103,14 +103,14 @@ pixel_size = 0.44 # pixel size of input images in micrometers
 blur_score_a = blur_score_piqe(img_a, pixel_size)
 blur_score_b = blur_score_piqe(img_b, pixel_size)
 
-tissue_mask = tissue_mask(
+tissue_mask_img = tissue_mask(
         pyvips.Image.new_from_array(img_c), mpp=pixel_size
 ).numpy()
 
-tissue_mask = (tissue_mask > 0).astype(int) # binarize mask
+tissue_mask_img = (tissue_mask_img > 0).astype(int) # binarize mask
 
 # blur score with tissue mask
-blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask)
+blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask_img)
 ```
 
 The `pixel_size` parameter is used to calculate the kernel size for median filter that is used during the computation.
