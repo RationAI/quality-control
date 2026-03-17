@@ -12,7 +12,7 @@ the technical overhead needed for processing the complete WSIs.
 
 ## Examples
 
-The following examples should provide you with the neccessary information for running the provided QC functions.
+The following examples should provide you with the necessary information for running the provided QC functions.
 
 ### Detecting Residual Artifacts
 
@@ -118,7 +118,7 @@ The `pixel_size` parameter is used to calculate the kernel size for median filte
 The blur function outputs 2 masks - `blur_score_coverage` and `blur_score_per_pixel`.
 `blur_score_per_pixel` is a binary mask marking the areas of the image that are considered blurred, while `blur_score_coverage` provides a blur coverage score for the whole image indicating the degree of blur.
 
-After obtaining the results, we can save the computated blur score masks.
+After obtaining the results, we can save the computed blur score masks.
 Since `blur_score_coverage` is homogeneous across the image, we can just print out any value from the score mask for quick inspection:
 
 ```python linenums="29"
