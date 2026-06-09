@@ -1,8 +1,8 @@
 import numpy as np
+from rationai.staining import ColorConversion, convert_color
 from skimage.morphology import area_opening
 
 from rationai.qc.typing import BinaryMask, ResidualArtifacts, RGBImage
-from rationai.staining import ColorConversion, convert_color
 
 
 def _get_foreground_mask(
