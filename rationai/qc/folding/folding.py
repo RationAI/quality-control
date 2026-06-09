@@ -1,10 +1,10 @@
 import numpy as np
 from numpy.ma import MaskedArray
 from numpy.typing import NDArray
-from rationai.staining import ColorConversion, convert_color
+from rationai.staining import StandardConversions, convert_color
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_yen
-from skimage.morphology import binary_opening, disk, reconstruction
+from skimage.morphology import disk, opening, reconstruction
 
 from rationai.qc.typing import BinaryMask, FoldArtifacts, RGBImage
 
@@ -71,12 +71,14 @@ def folding(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                       | Description                           |
-        |---------------------------|---------------------------------------|
-        | `folding`                 | Binary mask of the detected folds.    |
-        | `thresholded_saturation`  |                                       |
-        | `thresholded_value`       |                                       |
-        | `thresholded_eosin`       |                                       |
+        | Key                         | Description                                           |
+        |-----------------------------|-------------------------------------------------------|
+        | `folding_per_pixel`         | Binary mask of the detected folds.                    |
+        | `thresholded_saturation`    |                                                       |
+        | `thresholded_value`         |                                                       |
+        | `thresholded_eosin`         |                                                       |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
     Examples:
     ```python
@@ -90,7 +92,7 @@ def folding(
 
     result = folding(img, 8, False, tissue_mask)
 
-    mask = result["folding"]  # Contains values 0 and 1
+    mask = result["folding_per_pixel"]  # Contains values 0 and 1
     ```
 
     """
@@ -110,15 +112,15 @@ def folding(
         )
         local_value_channel = 1 - local_value_channel
     if hematoxylin_eosin_stained:
-        _, eosin_channel, _ = convert_color(tile, ColorConversion.RGB2HER)
+        _, eosin_channel, _ = convert_color(tile, StandardConversions.RGB2HER)
         if local_tiles is not None:
             _, local_eosin_channel, _ = convert_color(
-                local_tiles, ColorConversion.RGB2HER
+                local_tiles, StandardConversions.RGB2HER
             )
     else:
         eosin_channel = np.ones_like(tissue_mask)
         if local_tiles is not None:
-            local_eosin_channel = np.ones_like(local_tiles)
+            local_eosin_channel = np.ones_like(local_tiles, dtype=np.float64)
 
     inverted_value_channel = 1 - value_channel
 
@@ -128,7 +130,7 @@ def folding(
     saturation_threshold = _get_threshold(
         saturation_channel, tissue_mask, local_saturation_channel, local_mask
     )
-    if hematoxylin_eosin_stained:
+    if hematoxylin_eosin_stained and eosin_channel is not None:
         eosin_threshold = _get_threshold(
             eosin_channel, tissue_mask, local_eosin_channel, local_mask
         )
@@ -146,24 +148,21 @@ def folding(
     ):
         thresholded_value = np.zeros(tile.shape)
 
-    folding_test_markers = binary_opening(
+    folding_test_markers = opening(
         thresholded_eosin & thresholded_saturation & thresholded_value,
         disk(cell_nucleus_size // (mpp)),
     )
 
     if hematoxylin_eosin_stained:
         folding_test = reconstruction(folding_test_markers, thresholded_eosin)
-        result: FoldArtifacts = {
-            "folding": folding_test,
-            "thresholded_saturation": thresholded_saturation,
-            "thresholded_eosin": thresholded_eosin,
-            "thresholded_value": thresholded_value,
-        }
-        return result
-    result: FoldArtifacts = {
-        "folding": folding_test,
+    else:
+        folding_test = folding_test_markers
+
+    return {
+        "folding_per_pixel": folding_test,
         "thresholded_saturation": thresholded_saturation,
         "thresholded_eosin": thresholded_eosin,
         "thresholded_value": thresholded_value,
+        "number_of_examined_pixels": int(np.count_nonzero(tissue_mask)),
+        "number_of_flagged_pixels": int(np.count_nonzero(folding_test)),
     }
-    return result

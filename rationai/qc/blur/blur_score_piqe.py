@@ -33,10 +33,12 @@ def blur_score_piqe(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                   | Description                     |
-        |-----------------------|---------------------------------|
-        | `blur_score_per_pixel`| Binary mask of the blur score.  |
-        | `blur_score_coverage` | Coverage mask of the blur score.|
+        | Key                         | Description                                           |
+        |-----------------------------|-------------------------------------------------------|
+        | `blur_score_per_pixel`      | Binary mask of the blur score.                        |
+        | `blur_score_coverage`       | Coverage mask of the blur score.                      |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
     Examples:
     ```python
@@ -82,14 +84,14 @@ def blur_score_piqe(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
-    # activity_mask is inverted, blurred areas and empty areas (background) are set to 1
-    activity_mask = ~(activity_mask > 0)
-    # activity_mask is multiplied by the foreground mask to nullify background pixels
-    activity_mask = activity_mask * foreground_mask
+    # Invert and restrict the mask to foreground
+    activity_mask = foreground_mask * ~(activity_mask > 0)
 
     return {
-        "blur_score_per_pixel": activity_mask > 0,
+        "blur_score_per_pixel": activity_mask,
         "blur_score_coverage": get_coverage_mask(
             grayscale_img, activity_mask, foreground_mask
         ),
+        "number_of_examined_pixels": int(np.count_nonzero(foreground_mask)),
+        "number_of_flagged_pixels": int(np.count_nonzero(activity_mask)),
     }
