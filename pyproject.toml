@@ -18,6 +18,7 @@ dependencies = [
     "opencv-python>=4.10.0.84",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
     "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
+    "Pillow>=12.1.0",
 ]
 
 [dependency-groups]
