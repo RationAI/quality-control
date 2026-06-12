@@ -8,9 +8,11 @@ from rationai.qc.staining import (
     is_slide_correctly_stained,
     staining_difference,
 )
+from rationai.qc.thresholds import StandardResidualThresholds
 
 
 __all__ = [
+    "StandardResidualThresholds",
     "blur_score_laplacian",
     "blur_score_piqe",
     "blur_score_roberts",
