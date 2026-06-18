@@ -14,7 +14,7 @@ class StandardResidualThresholds:
 
     HER: Final[ResidualThresholds] = ResidualThresholds(
         c1_negative=0.02,
-        c2_negative=0.005,
+        c2_negative=0.02,
         c3_negative=0.04,
         c3_positive=0.005,
     )
