@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import TypeAlias, TypedDict
 
 import numpy as np
@@ -29,6 +30,19 @@ Stain: TypeAlias = NDArray[np.float64]
 """
 Single stain vector (of 3 values) represented by a numpy array.
 """
+
+
+class NegativeChannel(Enum):
+    """Enum labeling negative parts of color separated channels."""
+
+    C1 = 0
+    """Negative part of the first converted channel."""
+
+    C2 = 1
+    """Negative part of the second converted channel."""
+
+    C3 = 2
+    """Negative part of the third converted channel."""
 
 
 @dataclass(frozen=True)

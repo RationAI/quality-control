@@ -1,9 +1,10 @@
 import numpy as np
 from rationai.staining import ColorConversion, convert_color
-from skimage.morphology import area_opening
+from skimage.morphology import area_opening, disk, erosion, reconstruction
 
 from rationai.qc.typing import (
     BinaryMask,
+    NegativeChannel,
     ResidualArtifacts,
     ResidualThresholds,
     RGBImage,
@@ -43,6 +44,8 @@ def _get_debris_coverage(
     conv: ColorConversion,
     nucleus_area: int,
     thresholds: ResidualThresholds,
+    nuclei_channel: NegativeChannel | None = None,
+    erosion_radius: int = 0,
 ) -> tuple[int, int, BinaryMask]:
     """Computes foreground debris coverage by thresholding specifc channels.
 
@@ -52,6 +55,11 @@ def _get_debris_coverage(
         nucleus_area: Approximate area of a single cell nucleus in pixels.
         thresholds: Thresholds for residual artifact detection.
             See the `StandardResidualThresholds` class for suggested threshold values.
+        nuclei_channel: Optional negative part of a separated channel that could contain
+            incorrectly detected tightly packed nuclei. If specified, only connected
+            components that survive erosion with a disk of radius `erosion_radius` are kept.
+        erosion_radius: Radius of the disk used for erosion. Only relevant
+            if `nuclei_channel` is specified. Defaults to 0.
 
     Returns:
         Number of foreground pixels examined, number of foreground pixels
@@ -65,6 +73,18 @@ def _get_debris_coverage(
 
     c1_neg, c2_neg = -np.minimum(c1, 0), -np.minimum(c2, 0)
     c3_pos, c3_neg = np.maximum(c3, 0), -np.minimum(c3, 0)
+
+    if nuclei_channel is not None and erosion_radius > 0:
+        # Supressing incorrect detections of tightly packed nuclei
+        channels = [c1_neg, c2_neg, c3_neg]
+
+        channel = channels[nuclei_channel.value]
+        marker = erosion(channel, footprint=disk(erosion_radius))
+
+        channels[nuclei_channel.value] = reconstruction(
+            marker, channel, method="dilation"
+        )
+        c1_neg, c2_neg, c3_neg = channels
 
     # Join results from all thresholded channels
     residual_mask = np.logical_or(
@@ -92,6 +112,8 @@ def residual_artifacts_and_coverage(
     conversion: ColorConversion,
     nucleus_area: int,
     thresholds: ResidualThresholds,
+    nuclei_channel: NegativeChannel | None = None,
+    erosion_radius: int = 0,
 ) -> ResidualArtifacts:
     """Creates a binary mask of residual artifacts.
 
@@ -101,6 +123,11 @@ def residual_artifacts_and_coverage(
         nucleus_area: Approximate area of a single cell nucleus in pixels.
         thresholds: Thresholds for residual artifact detection.
             See the `StandardResidualThresholds` class for suggested threshold values.
+        nuclei_channel: Optional negative part of a separated channel that could contain
+            incorrectly detected tightly packed nuclei. If specified, only connected
+            components that survive erosion with a disk of radius `erosion_radius` are kept.
+        erosion_radius: Radius of the disk used for erosion. Only relevant
+            if `nuclei_channel` is specified. Defaults to 0.
 
     Returns:
         Dictionary with a number of examined pixels, number of flagged pixels,
@@ -141,6 +168,8 @@ def residual_artifacts_and_coverage(
         conv=conversion,
         nucleus_area=nucleus_area,
         thresholds=thresholds,
+        nuclei_channel=nuclei_channel,
+        erosion_radius=erosion_radius,
     )
 
     result: ResidualArtifacts = {
