@@ -57,7 +57,8 @@ def _get_debris_coverage(
             See the `StandardResidualThresholds` class for suggested threshold values.
         nuclei_channel: Optional negative part of a separated channel that could contain
             incorrectly detected tightly packed nuclei. If specified, only connected
-            components that survive erosion with a disk of radius `erosion_radius` are kept.
+            components of the detection in this channel that survive erosion
+            with a disk of radius `erosion_radius` are kept.
         erosion_radius: Radius of the disk used for erosion. Only relevant
             if `nuclei_channel` is specified. Defaults to 0.
 
@@ -69,14 +70,16 @@ def _get_debris_coverage(
         convert_color(tile=img, conversion=conv, keep_negative_values=True),
         dtype=np.float64,
     )
-    th = thresholds
 
-    c1_neg, c2_neg = -np.minimum(c1, 0), -np.minimum(c2, 0)
-    c3_pos, c3_neg = np.maximum(c3, 0), -np.minimum(c3, 0)
+    mask_c1_neg = -np.minimum(c1, 0) >= thresholds.c1_negative
+    mask_c2_neg = -np.minimum(c2, 0) >= thresholds.c2_negative
+
+    mask_c3_pos = +np.maximum(c3, 0) >= thresholds.c3_positive
+    mask_c3_neg = -np.minimum(c3, 0) >= thresholds.c3_negative
 
     if nuclei_channel is not None and erosion_radius > 0:
         # Supressing incorrect detections of tightly packed nuclei
-        channels = [c1_neg, c2_neg, c3_neg]
+        channels = [mask_c1_neg, mask_c2_neg, mask_c3_neg]
 
         channel = channels[nuclei_channel.value]
         marker = erosion(channel, footprint=disk(erosion_radius))
@@ -84,12 +87,10 @@ def _get_debris_coverage(
         channels[nuclei_channel.value] = reconstruction(
             marker, channel, method="dilation"
         )
-        c1_neg, c2_neg, c3_neg = channels
+        mask_c1_neg, mask_c2_neg, mask_c3_neg = channels
 
-    # Join results from all thresholded channels
     residual_mask = np.logical_or(
-        np.logical_or(c1_neg >= th.c1_negative, c2_neg >= th.c2_negative),
-        np.logical_or(c3_pos >= th.c3_positive, c3_neg >= th.c3_negative),
+        np.logical_or(mask_c1_neg, mask_c2_neg), np.logical_or(mask_c3_pos, mask_c3_neg)
     )
 
     # Remove artifacts smaller that a single nucleus
