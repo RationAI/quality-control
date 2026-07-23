@@ -1,6 +1,6 @@
+import cv2 as cv
 import numpy as np
 from rationai.staining import ColorConversion, convert_color
-from skimage.morphology import area_opening, disk, erosion, reconstruction
 
 from rationai.qc.typing import (
     BinaryMask,
@@ -28,15 +28,79 @@ def _get_foreground_mask(
     Returns:
         Binary foreground mask of the tile.
     """
-    img = img.astype(np.float64)
-
     # Value of zero corresponds to a pixel that did not capture any light
     # Nearly no stain -> low OD values
-    od = np.maximum(0, -np.log((img + 1) / i0))
+    od = np.maximum(0, -np.log((img.astype(np.float64) + 1) / i0))
     od_channel_sum = np.sum(np.where(od >= beta, 1, 0), axis=2)
 
     # Pixel is labeled as foreground if it is larger than beta in at least one channel
     return od_channel_sum != 0
+
+
+def _area_opening(img: BinaryMask, area_threshold: int) -> BinaryMask:
+    """Removes connected components smaller than a given area threshold.
+
+    Args:
+        img: Binary mask to be processed.
+        area_threshold: Minimum area of connected components to be kept.
+
+    Returns:
+        Binary mask with small connected components removed.
+    """
+    output = np.zeros_like(img, dtype=bool)
+
+    num_labels, labels, stats, _ = cv.connectedComponentsWithStats(
+        img.astype(np.uint8), connectivity=4
+    )
+
+    for i in range(1, num_labels):
+        if stats[i, cv.CC_STAT_AREA] >= area_threshold:
+            output[labels == i] = True
+
+    return output
+
+
+def _erosion_with_disk(mask: BinaryMask, radius: int) -> BinaryMask:
+    """Erodes a binary mask with a disk of a given radius.
+
+    Args:
+        mask: Binary mask to be eroded.
+        radius: Radius of the disk used for erosion.
+
+    Returns:
+        Eroded binary mask.
+    """
+    se_size = 2 * radius + 1
+    se = cv.getStructuringElement(cv.MORPH_ELLIPSE, (se_size, se_size))
+
+    return cv.erode(mask.astype(np.uint8), se).astype(bool)
+
+
+def _reconstruction(marker: BinaryMask, mask: BinaryMask) -> BinaryMask:
+    """Performs morphological reconstruction of a binary mask.
+
+    Args:
+        marker: Binary mask that serves as the starting point for reconstruction.
+        mask: Binary mask that serves as the constraint for reconstruction.
+
+    Returns:
+        Reconstructed binary mask.
+    """
+    cv_mask = mask.astype(np.uint8)
+    cv_marker = marker.astype(np.uint8)
+
+    se = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+
+    current = cv.bitwise_and(cv_marker, cv_mask)
+    reconstructed = np.zeros_like(cv_mask, dtype=np.uint8)
+
+    while not np.array_equal(reconstructed, current):
+        current = reconstructed
+
+        dilated = cv.dilate(current, se)
+        reconstructed = cv.bitwise_and(dilated, cv_mask)
+
+    return reconstructed.astype(bool)
 
 
 def _get_debris_coverage(
@@ -82,11 +146,10 @@ def _get_debris_coverage(
         channels = [mask_c1_neg, mask_c2_neg, mask_c3_neg]
 
         channel = channels[nuclei_channel.value]
-        marker = erosion(channel, footprint=disk(erosion_radius))
+        marker = _erosion_with_disk(channel, radius=erosion_radius)
 
-        channels[nuclei_channel.value] = reconstruction(
-            marker, channel, method="dilation"
-        )
+        channels[nuclei_channel.value] = _reconstruction(marker, channel)
+
         mask_c1_neg, mask_c2_neg, mask_c3_neg = channels
 
     residual_mask = np.logical_or(
@@ -94,7 +157,7 @@ def _get_debris_coverage(
     )
 
     # Remove artifacts smaller that a single nucleus
-    residual_mask = area_opening(residual_mask, area_threshold=nucleus_area)
+    residual_mask = _area_opening(residual_mask, area_threshold=nucleus_area)
 
     foreground_mask = _get_foreground_mask(img)
     foreground_area = np.count_nonzero(foreground_mask)
