@@ -22,7 +22,13 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["mypy", "pre-commit", "ruff"]
+dev = [
+    "mypy",
+    "opencv-stubs>=0.1.3",
+    "pre-commit",
+    "pyinstrument",
+    "ruff",
+]
 test = ["pytest", "pytest-cov"]
 docs = [
     "mkdocs-material>=9.5.32",
