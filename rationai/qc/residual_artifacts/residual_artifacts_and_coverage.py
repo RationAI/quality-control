@@ -31,10 +31,9 @@ def _get_foreground_mask(
     # Value of zero corresponds to a pixel that did not capture any light
     # Nearly no stain -> low OD values
     od = np.maximum(0, -np.log((img.astype(np.float64) + 1) / i0))
-    od_channel_sum = np.sum(np.where(od >= beta, 1, 0), axis=2)
 
     # Pixel is labeled as foreground if it is larger than beta in at least one channel
-    return od_channel_sum != 0
+    return np.any(od >= beta, axis=2)
 
 
 def _area_opening(img: BinaryMask, area_threshold: int) -> BinaryMask:
