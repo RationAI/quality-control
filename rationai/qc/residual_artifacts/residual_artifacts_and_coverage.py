@@ -90,16 +90,19 @@ def _reconstruction(marker: BinaryMask, mask: BinaryMask) -> BinaryMask:
 
     se = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
 
-    current = cv.bitwise_and(cv_marker, cv_mask)
-    reconstructed = np.zeros_like(cv_mask, dtype=np.uint8)
+    cv_current = cv.bitwise_and(cv_marker, cv_mask)
+    cv_reconstructed = np.zeros_like(cv_mask, dtype=np.uint8)
 
-    while not np.array_equal(reconstructed, current):
-        current = reconstructed
+    while True:
+        cv.dilate(cv_current, se, dst=cv_reconstructed)
+        cv.bitwise_and(cv_reconstructed, cv_mask, dst=cv_reconstructed)
 
-        dilated = cv.dilate(current, se)
-        reconstructed = cv.bitwise_and(dilated, cv_mask)
+        if np.array_equal(cv_reconstructed, cv_current):
+            break
 
-    return reconstructed.astype(bool)
+        cv_current = cv_reconstructed.copy()
+
+    return cv_current.astype(bool)
 
 
 def _get_debris_coverage(
