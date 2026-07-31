@@ -203,9 +203,9 @@ from rationai.qc import folding
 
 mpp = 1.76
 img = np.asarray(Image.open("fold.png").convert("RGB"))  # Investigated image
-local_area_image = np.asarray(
+neigborhood_image = np.asarray(
     Image.open("fold_area.png").convert("RGB")
-)  # Local area of investigated image
+)  # Neighborhood area of investigated image
 ```
 
 Now we can calculate the tissue masks:
@@ -213,8 +213,8 @@ Now we can calculate the tissue masks:
 ```python linenums="12"
 img_mask = tissue_mask(pyvips.Image.new_from_array(img), mpp=mpp).numpy() > 0
 
-img_area_mask = (
-    tissue_mask(pyvips.Image.new_from_array(local_area_image), mpp=mpp).numpy() > 0
+neighborhood_mask = (
+    tissue_mask(pyvips.Image.new_from_array(neigborhood_image), mpp=mpp).numpy() > 0
 )
 ```
 
@@ -226,8 +226,8 @@ artifacts = folding(
     mpp=mpp,
     hematoxylin_eosin_stained=True,
     tissue_mask=img_mask,
-    local_tiles=local_area_image,
-    local_mask=img_area_mask,
+    neighborhood_tiles=neigborhood_image,
+    neighborhood_mask=neighborhood_mask,
 )
 ```
 
