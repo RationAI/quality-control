@@ -1,18 +1,17 @@
 import numpy as np
 from numpy.ma import MaskedArray
-from numpy.typing import NDArray
 from rationai.staining import StandardConversions, convert_color
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_yen
 from skimage.morphology import disk, opening, reconstruction
 
-from rationai.qc.typing import BinaryMask, FoldArtifacts, RGBImage
+from rationai.qc.typing import BinaryMask, FloatingPointImage, FoldArtifacts, RGBImage
 
 
 def _get_threshold(
-    img: NDArray[np.float64],
+    img: FloatingPointImage,
     mask: BinaryMask,
-    local_tiles: NDArray[np.float64] | None = None,
+    local_tiles: FloatingPointImage | None = None,
     local_mask: BinaryMask | None = None,
 ) -> float:
     """Calculates adequate threshold from given images.
