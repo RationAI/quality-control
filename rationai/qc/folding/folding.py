@@ -11,22 +11,22 @@ from rationai.qc.typing import BinaryMask, FloatingPointImage, FoldArtifacts, RG
 def _get_threshold(
     img: FloatingPointImage,
     mask: BinaryMask,
-    local_tiles: FloatingPointImage | None = None,
-    local_mask: BinaryMask | None = None,
+    neighborhood_tiles: FloatingPointImage | None = None,
+    neighborhood_mask: BinaryMask | None = None,
 ) -> float:
     """Calculates adequate threshold from given images.
 
     Args:
         img: A given channel of an image.
         mask: Background mask of an image.
-        local_tiles: Optional n*n tiles in local neighbourhood of tile. Defaults to None.
-        local_mask: Optional n*n background mask of local_tiles. Defaults to None.
+        neighborhood_tiles: Optional n*n tiles in local neighbourhood of tile. Defaults to None.
+        neighborhood_mask: Optional n*n background mask of neighborhood_tiles. Defaults to None.
 
     Returns:
         Value which can be used to threshold the image.
     """
-    if local_tiles is not None and local_mask is not None:
-        local_values = MaskedArray(local_tiles, ~local_mask).compressed()
+    if neighborhood_tiles is not None and neighborhood_mask is not None:
+        local_values = MaskedArray(neighborhood_tiles, ~neighborhood_mask).compressed()
 
         if local_values.size > 0:
             return threshold_yen(local_values)
@@ -46,8 +46,8 @@ def folding(
     mpp: float,
     hematoxylin_eosin_stained: bool,
     tissue_mask: BinaryMask,
-    local_tiles: RGBImage | None = None,
-    local_mask: BinaryMask | None = None,
+    neighborhood_tiles: RGBImage | None = None,
+    neighborhood_mask: BinaryMask | None = None,
     cell_nucleus_size: float = 7,
 ) -> FoldArtifacts:
     """Creates a binary mask of folding artifacts.
@@ -58,8 +58,8 @@ def folding(
         hematoxylin_eosin_stained: True if image is stained using Hematoxylin and Eosin.
         tissue_mask: A mask, where the tissue is labeled 1 and the background 0,
             should be as pixel-precise as possible.
-        local_tiles: A local area surrounding the given tile.
-        local_mask: Tissue mask of local_tiles.
+        neighborhood_tiles: An image of neighborhood surrounding the given tile.
+        neighborhood_mask: Tissue mask of neighborhood_tiles.
         cell_nucleus_size: Cell nucleus size in microns. This value is used for morphological operations.
             If estimating the value, it is better to overestimate the value.
             The default value is 7 based on empirical observations.
@@ -103,8 +103,8 @@ def folding(
         None,
         None,
     )
-    if local_tiles is not None:
-        hsv_local = rgb2hsv(local_tiles)
+    if neighborhood_tiles is not None:
+        hsv_local = rgb2hsv(neighborhood_tiles)
         local_saturation_channel, local_value_channel = (
             hsv_local[:, :, 1],
             hsv_local[:, :, 2],
@@ -112,26 +112,26 @@ def folding(
         local_value_channel = 1 - local_value_channel
     if hematoxylin_eosin_stained:
         _, eosin_channel, _ = convert_color(tile, StandardConversions.RGB2HER)
-        if local_tiles is not None:
+        if neighborhood_tiles is not None:
             _, local_eosin_channel, _ = convert_color(
-                local_tiles, StandardConversions.RGB2HER
+                neighborhood_tiles, StandardConversions.RGB2HER
             )
     else:
         eosin_channel = np.ones_like(tissue_mask)
-        if local_tiles is not None:
-            local_eosin_channel = np.ones_like(local_tiles, dtype=np.float64)
+        if neighborhood_tiles is not None:
+            local_eosin_channel = np.ones_like(neighborhood_tiles, dtype=np.float64)
 
     inverted_value_channel = 1 - value_channel
 
     value_threshold = _get_threshold(
-        inverted_value_channel, tissue_mask, local_value_channel, local_mask
+        inverted_value_channel, tissue_mask, local_value_channel, neighborhood_mask
     )
     saturation_threshold = _get_threshold(
-        saturation_channel, tissue_mask, local_saturation_channel, local_mask
+        saturation_channel, tissue_mask, local_saturation_channel, neighborhood_mask
     )
     if hematoxylin_eosin_stained and eosin_channel is not None:
         eosin_threshold = _get_threshold(
-            eosin_channel, tissue_mask, local_eosin_channel, local_mask
+            eosin_channel, tissue_mask, local_eosin_channel, neighborhood_mask
         )
     else:
         eosin_threshold = 0
