@@ -63,7 +63,9 @@ def blur_score_piqe(
     # for the median filter based on the pixel size
     optimal_pixel_size = 0.44
 
-    kernel_size = 2 * round(1 / pixel_size * optimal_pixel_size + 1e-9) + 1
+    # Ensure kernel is at least 3x3
+    kernel_size = max(2 * round(1 / pixel_size * optimal_pixel_size + 1e-9) + 1, 3)
+
     grayscale_img = median(
         rgb2gray(img), footprint=np.ones((kernel_size, kernel_size), dtype=bool)
     )
