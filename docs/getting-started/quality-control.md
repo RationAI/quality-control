@@ -38,7 +38,6 @@ Next, we will need to prepare the arguments for the [residual_artifacts_and_cove
 function and call it on the input image:
 
 ```python linenums="9"
-
 conversion = StandardConversions.RGB2HER
 nucleus_area = 150
 res_index = 2
@@ -89,25 +88,25 @@ from rationai.masks import tissue_mask
 from rationai.qc import blur_score_piqe
 
 
-img_a = np.asarray(Image.open("blur_A.png").convert("RGB")) # Focused image
-img_b = np.asarray(Image.open("blur_B.png").convert("RGB")) # Partially blurred image
-img_c = np.asarray(Image.open("blur_C.png").convert("RGB")) # Blurred image
+img_a = np.asarray(Image.open("blur_A.png").convert("RGB"))  # Focused image
+img_b = np.asarray(Image.open("blur_B.png").convert("RGB"))  # Partially blurred image
+img_c = np.asarray(Image.open("blur_C.png").convert("RGB"))  # Blurred image
 ```
 
 Next, we will need to prepare the arguments for the [blur_score_piqe](../api/blur/blur-score-piqe.md) function and call it on the input images:
 
 ```python linenums="12"
-pixel_size = 0.44 # pixel size of input images in micrometers
+pixel_size = 0.44  # pixel size of input images in micrometers
 
 # blur score without tissue mask
 blur_score_a = blur_score_piqe(img_a, pixel_size)
 blur_score_b = blur_score_piqe(img_b, pixel_size)
 
 tissue_mask_img = tissue_mask(
-        pyvips.Image.new_from_array(img_c), mpp=pixel_size
+    pyvips.Image.new_from_array(img_c), mpp=pixel_size
 ).numpy()
 
-tissue_mask_img = (tissue_mask_img > 0).astype(int) # binarize mask
+tissue_mask_img = (tissue_mask_img > 0).astype(int)  # binarize mask
 
 # blur score with tissue mask
 blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask_img)
@@ -124,7 +123,6 @@ After obtaining the results, we can save the computed blur score masks.
 Since `blur_score_coverage` is homogeneous across the image, we can just print out any value from the score mask for quick inspection:
 
 ```python linenums="29"
-
 print(blur_score_a["blur_score_coverage"][0][0])
 
 # save the coverage masks
@@ -205,30 +203,32 @@ from rationai.qc import folding
 
 mpp = 1.76
 img = np.asarray(Image.open("fold.png").convert("RGB"))  # Investigated image
-local_area_image = np.asarray(Image.open("fold_area.png").convert("RGB"))  # Local area of investigated image
+neigborhood_image = np.asarray(
+    Image.open("fold_area.png").convert("RGB")
+)  # Neighborhood area of investigated image
 ```
 
 Now we can calculate the tissue masks:
 
 ```python linenums="12"
-img_mask = tissue_mask(
-        pyvips.Image.new_from_array(img), mpp=mpp
-).numpy() > 0
+img_mask = tissue_mask(pyvips.Image.new_from_array(img), mpp=mpp).numpy() > 0
 
-img_area_mask = tissue_mask(
-        pyvips.Image.new_from_array(local_area_image), mpp=mpp
-).numpy() > 0
+neighborhood_mask = (
+    tissue_mask(pyvips.Image.new_from_array(neigborhood_image), mpp=mpp).numpy() > 0
+)
 ```
 
 Now we have all the arguments prepared. The folding function can be called:
 
 ```python linenums="20"
-artifacts = folding(img=img,
-                    mpp=mpp,
-                    hematoxylin_eosin_stained=True,
-                    tissue_mask=img_mask,
-                    local_tiles=local_area_image,
-                    local_mask=img_area_mask)
+artifacts = folding(
+    img=img,
+    mpp=mpp,
+    hematoxylin_eosin_stained=True,
+    tissue_mask=img_mask,
+    neighborhood_tiles=neigborhood_image,
+    neighborhood_mask=neighborhood_mask,
+)
 ```
 
 #### Results
