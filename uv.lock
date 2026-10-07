@@ -1756,8 +1756,8 @@ test = [
 
 [[package]]
 name = "rationai-staining"
-version = "0.3.0"
-source = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git#c48d216e910df11f3e6891aa071ebb8d04635727" }
+version = "0.4.0"
+source = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git#b724039f1dd1bdd339f59fa02edf327fe8b080a3" }
 dependencies = [
     { name = "albumentations" },
     { name = "numpy" },
