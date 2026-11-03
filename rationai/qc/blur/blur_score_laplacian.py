@@ -1,8 +1,8 @@
 import numpy as np
-from rationai.staining import ColorConversion, convert_color
+from rationai.staining import StandardConversions, convert_color
 from skimage.color import rgb2gray
 from skimage.filters import laplace, threshold_otsu
-from skimage.morphology import binary_dilation, binary_erosion
+from skimage.morphology import dilation, erosion
 
 from rationai.qc.blur.utils import (
     get_coverage_mask,
@@ -45,10 +45,12 @@ def blur_score_laplacian(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                   | Description                     |
-        |-----------------------|---------------------------------|
-        | `blur_score_per_pixel`| Binary mask of the blur score.  |
-        | `blur_score_coverage` | Coverage mask of the blur score.|
+        | Key                         | Description                                           |
+        |-----------------------------|-------------------------------------------------------|
+        | `blur_score_per_pixel`      | Binary mask of the blur score.                        |
+        | `blur_score_coverage`       | Coverage mask of the blur score.                      |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
     Examples:
     ```python
@@ -73,7 +75,7 @@ def blur_score_laplacian(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
-    hematoxylin, _, _ = convert_color(img, ColorConversion.RGB2HER)
+    hematoxylin, _, _ = convert_color(img, StandardConversions.RGB2HER)
 
     hematoxylin_threshold = threshold_otsu(hematoxylin)
     hematoxylin_mask = hematoxylin > hematoxylin_threshold
@@ -84,20 +86,20 @@ def blur_score_laplacian(
     # 2 pixels wide border is removed from the pooling mask for each hematoxylin nucleus
     # to ignore gradient values on the edges of the nuclei
     pooling_mask = foreground_mask * ~(
-        binary_dilation(hematoxylin_mask, footprint=footprint)
-        ^ binary_erosion(hematoxylin_mask, footprint=footprint)
+        dilation(hematoxylin_mask, footprint=footprint)
+        ^ erosion(hematoxylin_mask, footprint=footprint)
     )
 
     blur_score = np.abs(gradient)
-    blur_score_per_pixel = masked_average_pooling(blur_score, pooling_mask)
+    blur_score_pooled = masked_average_pooling(blur_score, pooling_mask)
 
     # Threshold was set to 5 based on empirical testing
     # Can be adjusted based on the desired sensitivity
     # Higher threshold means more pixels are considered blurred
-    blur_score_per_pixel = blur_score_per_pixel < threshold
+    blur_score_per_pixel = blur_score_pooled < threshold
 
     # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel = blur_score_per_pixel * foreground_mask
+    blur_score_per_pixel *= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,
@@ -106,4 +108,6 @@ def blur_score_laplacian(
             detection_mask=blur_score_per_pixel,
             foreground_mask=foreground_mask,
         ),
+        "number_of_examined_pixels": int(np.count_nonzero(foreground_mask)),
+        "number_of_flagged_pixels": int(np.count_nonzero(blur_score_per_pixel)),
     }

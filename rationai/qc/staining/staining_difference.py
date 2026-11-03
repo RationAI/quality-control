@@ -82,7 +82,7 @@ def staining_difference(
     from skimage.data import immunohistochemistry
 
     from rationai.qc.staining import dominant_stains, staining_difference
-    from rationai.staining import ColorConversion
+    from rationai.staining import StandardConversions
 
 
     img = immunohistochemistry()
@@ -91,7 +91,7 @@ def staining_difference(
     stain1, stain2 = stains["stain1"], stains["stain2"]
 
     result = staining_difference(
-        ColorConversion.RGB2HDR, stain1, stain2, 33, 25, "ciede_2000", "cie_76"
+        StandardConversions.RGB2HDR, stain1, stain2, 33, 25, "ciede_2000", "cie_76"
     )
     print(result["correct_staining"])
     print(result["stain_diff1"], result["stain_diff2"])

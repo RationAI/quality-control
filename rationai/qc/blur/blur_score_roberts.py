@@ -40,10 +40,12 @@ def blur_score_roberts(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                   | Description                     |
-        |-----------------------|---------------------------------|
-        | `blur_score_per_pixel`| Binary mask of the blur score.  |
-        | `blur_score_coverage` | Coverage mask of the blur score.|
+        | Key                         | Description                                           |
+        |-----------------------------|-------------------------------------------------------|
+        | `blur_score_per_pixel`      | Binary mask of the blur score.                        |
+        | `blur_score_coverage`       | Coverage mask of the blur score.                      |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
 
     Examples:
     ```python
@@ -72,17 +74,17 @@ def blur_score_roberts(
     gaussian_gradient = roberts(gaussian(grayscale_img, sigma=1))
 
     blur_score = np.abs(gradient - gaussian_gradient)
-    blur_score_per_pixel = masked_average_pooling(
+    blur_score_pooled = masked_average_pooling(
         arr=blur_score, foreground_mask=foreground_mask
     )
 
     # Threshold was set to 2 based on empirical testing
     # Can be adjusted based on the desired sensitivity
     # Higher threshold means more pixels are considered blurred
-    blur_score_per_pixel = blur_score_per_pixel < threshold
+    blur_score_per_pixel = blur_score_pooled < threshold
 
     # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel = blur_score_per_pixel * foreground_mask
+    blur_score_per_pixel *= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,
@@ -91,4 +93,6 @@ def blur_score_roberts(
             detection_mask=blur_score_per_pixel,
             foreground_mask=foreground_mask,
         ),
+        "number_of_examined_pixels": int(np.count_nonzero(foreground_mask)),
+        "number_of_flagged_pixels": int(np.count_nonzero(blur_score_per_pixel)),
     }
