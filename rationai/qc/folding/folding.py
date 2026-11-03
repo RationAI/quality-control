@@ -25,13 +25,16 @@ def _get_threshold(
     Returns:
         Value which can be used to threshold the image.
     """
+    if (neighborhood_tiles is None) != (neighborhood_mask is None):
+        raise ValueError(
+            "Both neighborhood_tiles and neighborhood_mask must be provided together."
+        )
+
     if neighborhood_tiles is not None and neighborhood_mask is not None:
         local_values = MaskedArray(neighborhood_tiles, ~neighborhood_mask).compressed()
 
         if local_values.size > 0:
             return threshold_yen(local_values)
-        else:
-            return 1.0
 
     values = MaskedArray(img, ~mask).compressed()
 
@@ -119,7 +122,9 @@ def folding(
     else:
         eosin_channel = np.ones_like(tissue_mask)
         if neighborhood_tiles is not None:
-            local_eosin_channel = np.ones_like(neighborhood_tiles, dtype=np.float64)
+            local_eosin_channel = np.ones(
+                neighborhood_tiles.shape[:2], dtype=np.float64
+            )
 
     inverted_value_channel = 1 - value_channel
 
@@ -141,9 +146,12 @@ def folding(
     thresholded_eosin = eosin_channel > eosin_threshold
 
     if (
-        np.sum(thresholded_value) * 2 > tile.size
-        or np.sum(thresholded_saturation) * 2 > tile.size
-        or (hematoxylin_eosin_stained and np.sum(thresholded_eosin) * 2 > tile.size)
+        np.sum(thresholded_value) * 2 > np.prod(tile.shape[:2])
+        or np.sum(thresholded_saturation) * 2 > np.prod(tile.shape[:2])
+        or (
+            hematoxylin_eosin_stained
+            and np.sum(thresholded_eosin) * 2 > np.prod(tile.shape[:2])
+        )
     ):
         thresholded_value = np.zeros(tile.shape)
 

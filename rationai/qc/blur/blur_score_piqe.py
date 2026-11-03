@@ -79,7 +79,10 @@ def blur_score_piqe(
     # Activity mask is one column shorter for images
     # with dimensions that are not divisible by 16
     if grayscale_img.shape != activity_mask.shape:
-        activity_mask = np.pad(activity_mask, ((0, 0), (0, 1)), mode="edge")
+        pad_h = grayscale_img.shape[0] - activity_mask.shape[0]
+        pad_w = grayscale_img.shape[1] - activity_mask.shape[1]
+
+        activity_mask = np.pad(activity_mask, ((0, pad_h), (0, pad_w)), mode="edge")
 
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
