@@ -18,9 +18,9 @@ def _get_threshold(
 
     Args:
         img: A given channel of an image.
-        mask: Background mask of an image.
+        mask: Foreground mask of an image.
         neighborhood_tiles: Optional n*n tiles in local neighbourhood of tile. Defaults to None.
-        neighborhood_mask: Optional n*n background mask of neighborhood_tiles. Defaults to None.
+        neighborhood_mask: Optional n*n foreground mask of `neighborhood_tiles`. Defaults to None.
 
     Returns:
         Value which can be used to threshold the image.
@@ -153,7 +153,7 @@ def folding(
             and np.sum(thresholded_eosin) * 2 > np.prod(tile.shape[:2])
         )
     ):
-        thresholded_value = np.zeros(tile.shape)
+        thresholded_value = np.zeros_like(thresholded_value)
 
     folding_test_markers = opening(
         thresholded_eosin & thresholded_saturation & thresholded_value,
