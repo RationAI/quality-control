@@ -27,8 +27,14 @@ First, we need to import the necessary functionality and load the image into num
 ```python linenums="1"
 import numpy as np
 from PIL import Image
-from rationai.qc import residual_artifacts_and_coverage
 from rationai.staining import StandardConversions
+
+from rationai.qc import (
+    NegativeChannel,
+    StandardResidualThresholds,
+    residual_artifacts_and_coverage,
+)
+from rationai.qc.residual_artifacts import visualize_thresholds
 
 
 img = np.asarray(Image.open("input.png").convert("RGB"))
@@ -37,22 +43,38 @@ img = np.asarray(Image.open("input.png").convert("RGB"))
 Next, we will need to prepare the arguments for the [residual_artifacts_and_coverage](../api/residual_artifacts/residual-artifacts-and-coverage.md)
 function and call it on the input image:
 
-```python linenums="9"
+```python linenums="15"
 conversion = StandardConversions.RGB2HER
-nucleus_area = 150
-res_index = 2
-threshold = 0.005
+thresholds = StandardResidualThresholds.HER
+nucleus_area = 30
+nuclei_channel = NegativeChannel.C2
+erosion_radius = 5
 
 artifacts = residual_artifacts_and_coverage(
-    img, conversion, nucleus_area, res_index, threshold
+    img,
+    conversion=conversion,
+    nucleus_area=nucleus_area,
+    thresholds=thresholds,
+    nuclei_channel=nuclei_channel,
+    erosion_radius=erosion_radius,
 )
 ```
 
-Since the tissue is stained with the **H&E protocol**, we used the `RGB2HER` color conversion with the corresponding index of the residual channel. The threshold value is based on the currently recommended value in the function's documentation. Finally, the nucleus area is manually approximated from the input image.
+Since the tissue is stained with the **H&E protocol**, we used the `RGB2HER` color conversion, which separates
+the image into the hematoxylin, eosin, and residual channels. Artifacts are detected by thresholding
+the negative parts of all three channels and the positive part of the third (residual) channel.
+The used thresholds are the suggested values for the `RGB2HER` conversion provided by the `StandardResidualThresholds` class.
+
+The nucleus area is manually approximated from the input image (nuclei are roughly 6 pixels wide),
+and all detections smaller than a single nucleus are removed.
+
+Finally, the negative part of the eosin channel (`NegativeChannel.C2`) can incorrectly mark clusters of tightly packed nuclei
+as artifacts. By specifying the `nuclei_channel` parameter, only the detections in this channel that survive erosion
+with a disk of radius `erosion_radius` are kept. Therefore, small clusters of nuclei are removed, while larger artifacts are preserved.
 
 After obtaining the results, we can save the binary artifact mask and print the number of examined and flagged pixels:
 
-```python linenums="18"
+```python linenums="30"
 mask = Image.fromarray(255 * artifacts["artifacts_per_pixel"].astype(np.uint8))
 mask.save("residual_mask.png")
 
@@ -62,10 +84,23 @@ print(f"Number of examined pixels: {artifacts['number_of_examined_pixels']}")
 
 The computed mask is returned as a binary image. Therefore, the computed values need to be scaled into the `[0, 255]` range before visualization.
 
+If the suggested thresholds do not fit your data, the `visualize_thresholds` function can help with tuning them.
+It returns four images (one for each thresholded channel), in which only the pixels exceeding the corresponding threshold
+keep their original color:
+
+```python linenums="36"
+c1_neg, c2_neg, c3_neg, c3_pos = visualize_thresholds(img, conversion, thresholds)
+
+c1_neg.save("c1_negative.png")
+c2_neg.save("c2_negative.png")
+c3_neg.save("c3_negative.png")
+c3_pos.save("c3_positive.png")
+```
+
 #### Results
 
-In our example, 17900 out of the 233744 examined pixels were labeled as artifacts,
-meaning that **little more than 7% of the image's foreground area** is covered by artifacts.
+In our example, 18327 out of the 233744 examined pixels were labeled as artifacts,
+meaning that **almost 8% of the image's foreground area** is covered by artifacts.
 Finally, the computed artifact mask looks like this:
 
 ![The generated mask](data/residual_mask.png)
