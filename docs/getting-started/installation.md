@@ -2,21 +2,21 @@
 
     [Pyvips](https://pypi.org/project/pyvips/) is a powerful and fast image processing library, particularly suited for working with large images like WSIs. To install `pyvips`, ensure that the `libvips` system dependencies are installed first:
 
-    #### Linux
+    === "Linux"
 
-    ```bash
-    sudo apt-get install libvips-dev
-    ```
+        ```bash
+        sudo apt-get install libvips-dev
+        ```
 
-    #### macOS (via Homebrew)
+    === "macOS (via Homebrew)"
 
-    ```bash
-    brew install vips
-    ```
+        ```bash
+        brew install vips
+        ```
 
-    #### Windows
+    === "Windows"
 
-    Follow the instructions on the official [libvips installation page](https://www.libvips.org/install.html).
+        For installation on Windows, follow the instructions on the official [libvips installation page](https://www.libvips.org/install.html).
 
 2. ### Install **OpenSlide** for Reading WSIs
 
@@ -25,12 +25,11 @@
     through its `openslide-python` bindings. The OpenSlide library itself needs to be installed separately:
 
     === "openslide-bin (all platforms)"
+        (*Note that this command assumes an existing uv project.*)
 
         ```bash
-        pip install openslide-bin
+        uv add openslide-bin
         ```
-
-        (*When using uv, run `uv add openslide-bin` instead.*)
 
     === "Linux"
 
