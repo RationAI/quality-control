@@ -40,9 +40,8 @@ def blur_score_laplacian(
 
 
     Returns:
-        Dictionary with the per-pixel and coverage mask
-            blur_score_per_pixel - binary mask composed of 16x16 px blocks marking blurred areas.
-            blur_score_coverage - coverage mask of the per_pixel detections. Coverage ranges from 0.0 to 1.0.
+        Dictionary with the per-pixel and coverage masks of the blur score,
+            and a number of examined and flagged pixels.
 
 
     Note:

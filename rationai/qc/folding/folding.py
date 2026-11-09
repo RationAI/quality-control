@@ -68,31 +68,35 @@ def folding(
             The default value is 7 based on empirical observations.
 
     Returns:
-        Dictionary with a binary mask of folds.
+        Dictionary with a binary mask of folds, intermediate thresholding results,
+            and a number of examined and flagged pixels.
 
     Note:
         The returned dictionary contains the following values:
 
-        | Key                         | Description                                           |
-        |-----------------------------|-------------------------------------------------------|
-        | `folding_per_pixel`         | Binary mask of the detected folds.                    |
-        | `thresholded_saturation`    |                                                       |
-        | `thresholded_value`         |                                                       |
-        | `thresholded_eosin`         |                                                       |
-        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function. |
-        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                |
+        | Key                         | Description                                                                 |
+        |-----------------------------|-----------------------------------------------------------------------------|
+        | `folding_per_pixel`         | Binary mask of the detected folds.                                          |
+        | `thresholded_saturation`    | Thresholded saturation channel (intermediate result, useful for debugging). |
+        | `thresholded_value`         | Thresholded value channel (intermediate result, useful for debugging).      |
+        | `thresholded_eosin`         | Thresholded eosin channel (intermediate result, useful for debugging).      |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function.                       |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                                      |
 
     Examples:
     ```python
+    import pyvips
+    from rationai.masks import tissue_mask
     from skimage.data import immunohistochemistry
 
     from rationai.qc import folding
 
 
     img = immunohistochemistry()
-    tissue_mask = function_for_tissue_mask(img)
+    mpp = 8
+    img_mask = tissue_mask(pyvips.Image.new_from_array(img), mpp=mpp).numpy() > 0
 
-    result = folding(img, 8, False, tissue_mask)
+    result = folding(img, mpp, False, img_mask)
 
     mask = result["folding_per_pixel"]  # Contains values 0 and 1
     ```
