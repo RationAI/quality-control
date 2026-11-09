@@ -48,7 +48,7 @@ def _get_debris_coverage(
     nuclei_channel: NegativeChannel | None = None,
     erosion_radius: int = 0,
 ) -> tuple[int, int, BinaryMask]:
-    """Computes foreground debris coverage by thresholding specifc channels.
+    """Computes foreground debris coverage by thresholding specific channels.
 
     Args:
         img: Image of a tissue.
@@ -79,7 +79,7 @@ def _get_debris_coverage(
     mask_c3_neg = -np.minimum(c3, 0) >= thresholds.c3_negative
 
     if nuclei_channel is not None and erosion_radius > 0:
-        # Supressing incorrect detections of tightly packed nuclei
+        # Suppressing incorrect detections of tightly packed nuclei
         channels = [mask_c1_neg, mask_c2_neg, mask_c3_neg]
 
         channel = channels[nuclei_channel.value]
