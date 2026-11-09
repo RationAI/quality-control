@@ -9,11 +9,12 @@ from rationai.qc.staining import (
     staining_difference,
 )
 from rationai.qc.thresholds import StandardResidualThresholds
-from rationai.qc.typing import NegativeChannel
+from rationai.qc.typing import NegativeChannel, ResidualThresholds
 
 
 __all__ = [
     "NegativeChannel",
+    "ResidualThresholds",
     "StandardResidualThresholds",
     "blur_score_laplacian",
     "blur_score_piqe",
