@@ -153,6 +153,8 @@ def folding(
             and np.sum(thresholded_eosin) * 2 > np.prod(tile.shape[:2])
         )
     ):
+        # If more than half of the pixels for any of the tested images are above the threshold,
+        # the thresholding is considered unreliable and an empty mask is computed.
         thresholded_value = np.zeros_like(thresholded_value)
 
     folding_test_markers = opening(
