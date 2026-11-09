@@ -8,7 +8,7 @@ authors = [
     { name = "Samuel Tichý", email = "524626@mail.muni.cz" },
     { name = "Karel Štěpka", email = "chuckie@mail.muni.cz" },
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 readme = "README.md"
 license = { file = "LICENSE" }
 
