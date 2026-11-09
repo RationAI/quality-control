@@ -93,7 +93,7 @@ def folding(
 
 
     img = immunohistochemistry()
-    mpp = 8
+    mpp = 1  # Approximate pixel size of the sample image in micrometers
     img_mask = tissue_mask(pyvips.Image.new_from_array(img), mpp=mpp).numpy() > 0
 
     result = folding(img, mpp, False, img_mask)
