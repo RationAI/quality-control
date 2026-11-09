@@ -1,10 +1,15 @@
+from typing import Any
+
 import numpy as np
-from skimage.morphology import area_opening, binary_erosion
+from numpy.typing import NDArray
+from skimage.morphology import area_opening, erosion
 
-from rationai.qc.typing import BinaryMask, GrayScaleImage, NDArray
+from rationai.qc.typing import BinaryMask, FloatingPointImage
 
 
-def masked_average_pooling(arr, foreground_mask):
+def masked_average_pooling(
+    arr: FloatingPointImage, foreground_mask: BinaryMask
+) -> FloatingPointImage:
     """Perform masked average pooling, creating mask of 16x16 blocks.
 
     For images with dimensions not divisible by 16, the function pads the image
@@ -55,14 +60,14 @@ def masked_average_pooling(arr, foreground_mask):
 
 
 def get_coverage_mask(
-    grayscale_img: GrayScaleImage,
+    tissue_img: NDArray[Any],
     detection_mask: BinaryMask,
     foreground_mask: BinaryMask,
-) -> NDArray[np.float64]:
-    """Creates a blur coverage mask based on the grayscale image and binary mask of blur detections.
+) -> FloatingPointImage:
+    """Creates a blur coverage mask based on the tissue image and binary mask of blur detections.
 
     Args:
-        grayscale_img: Grayscale image of the tissue.
+        tissue_img: Image of the tissue.
         detection_mask: Binary image of the blur detection.
         foreground_mask: Binary mask of the tissue, where 1 represents tissue and 0 represents background.
 
@@ -72,7 +77,7 @@ def get_coverage_mask(
     """
     foreground_area = np.count_nonzero(foreground_mask)
 
-    coverage_mask = np.ones_like(grayscale_img).astype(float)
+    coverage_mask = np.ones_like(tissue_img).astype(np.float64)
     coverage = (
         (np.sum(detection_mask * foreground_mask) / foreground_area)
         if foreground_area > 0
@@ -84,7 +89,7 @@ def get_coverage_mask(
 
 
 def simple_foreground_mask(
-    grayscale_img: NDArray[np.float64],
+    grayscale_img: FloatingPointImage,
     threshold: float = 0.92,  # ~235/255
 ) -> BinaryMask:
     """Creates a simple foreground mask using thresholding and morphological operations.
@@ -101,6 +106,6 @@ def simple_foreground_mask(
     foreground_mask = grayscale_img < threshold
 
     foreground_mask = area_opening(foreground_mask)
-    foreground_mask = binary_erosion(foreground_mask, footprint=np.ones((5, 5)))
+    foreground_mask = erosion(foreground_mask, footprint=np.ones((5, 5)))
 
     return foreground_mask
