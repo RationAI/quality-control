@@ -1,5 +1,6 @@
-from rationai.qc.typing import DominantStains, RGBImage
 from rationai.staining import estimate_stain_vectors
+
+from rationai.qc.typing import DominantStains, RGBImage
 
 
 def dominant_stains(

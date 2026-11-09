@@ -1,4 +1,5 @@
 import numpy as np
+from rationai.staining import ColorConversion, convert_color
 from skimage.color import rgb2gray
 from skimage.filters import laplace, threshold_otsu
 from skimage.morphology import binary_dilation, binary_erosion
@@ -9,8 +10,6 @@ from rationai.qc.blur.utils import (
     simple_foreground_mask,
 )
 from rationai.qc.typing import BinaryMask, BlurScore, RGBImage
-from rationai.staining import convert_color
-from rationai.staining.convert_color import ColorConversion
 
 
 def blur_score_laplacian(

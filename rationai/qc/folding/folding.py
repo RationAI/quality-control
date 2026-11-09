@@ -1,34 +1,45 @@
 import numpy as np
 from numpy.ma import MaskedArray
 from numpy.typing import NDArray
+from rationai.staining import ColorConversion, convert_color
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_yen
 from skimage.morphology import binary_opening, disk, reconstruction
 
 from rationai.qc.typing import BinaryMask, FoldArtifacts, RGBImage
-from rationai.staining import ColorConversion, convert_color
 
 
 def _get_threshold(
-    img: NDArray[np.float32],
-    mask: BinaryMask,  # type: ignore[PGH003]
-    local_tiles: NDArray[np.float32] | None = None,
-    local_mask: NDArray[bool] | None = None,  # type: ignore[PGH003]
+    img: NDArray[np.float64],
+    mask: BinaryMask,
+    local_tiles: NDArray[np.float64] | None = None,
+    local_mask: BinaryMask | None = None,
 ) -> float:
     """Calculates adequate threshold from given images.
 
     Args:
-        img  : A given channel of an image.
-        mask : Background mask of an image.
-        local_tiles : Optional n*n tiles in local neighbourhood of tile. Defaults to None.
-        local_mask : Optional n*n background mask of local_tiles. Defaults to None.
+        img: A given channel of an image.
+        mask: Background mask of an image.
+        local_tiles: Optional n*n tiles in local neighbourhood of tile. Defaults to None.
+        local_mask: Optional n*n background mask of local_tiles. Defaults to None.
 
     Returns:
         Value which can be used to threshold the image.
     """
-    if local_tiles is None:
-        return threshold_yen(MaskedArray(img, ~mask).compressed())
-    return threshold_yen(MaskedArray(local_tiles, ~local_mask).compressed())
+    if local_tiles is not None and local_mask is not None:
+        local_values = MaskedArray(local_tiles, ~local_mask).compressed()
+
+        if local_values.size > 0:
+            return threshold_yen(local_values)
+        else:
+            return 1.0
+
+    values = MaskedArray(img, ~mask).compressed()
+
+    if values.size == 0:
+        return 1.0
+
+    return threshold_yen(values)
 
 
 def folding(

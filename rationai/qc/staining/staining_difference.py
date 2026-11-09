@@ -1,10 +1,11 @@
+from rationai.staining import ColorConversion
+
 from rationai.qc.staining.color_difference import (
     closest_difference,
     color_difference,
     reference_stain,
 )
 from rationai.qc.typing import Stain, StainingDifference
-from rationai.staining import ColorConversion
 
 
 def staining_difference(

@@ -1,9 +1,9 @@
 import numpy as np
 from numpy.typing import NDArray
+from rationai.staining import ColorConversion, ConversionType
 from skimage.color import deltaE_cie76, deltaE_ciede94, deltaE_ciede2000, rgb2lab
 
 from rationai.qc.typing import Stain
-from rationai.staining import ColorConversion, ConversionType
 
 
 def _stain2rgb(stain: Stain) -> NDArray[np.float64]:
