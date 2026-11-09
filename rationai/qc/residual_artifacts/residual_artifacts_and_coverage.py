@@ -96,7 +96,7 @@ def _get_debris_coverage(
         np.logical_or(mask_c3_pos, negative_masks["c3_negative"]),
     )
 
-    # Remove artifacts smaller that a single nucleus
+    # Remove artifacts smaller than a single nucleus
     residual_mask = area_opening(residual_mask, area_threshold=nucleus_area)
 
     foreground_mask = _get_foreground_mask(img)
