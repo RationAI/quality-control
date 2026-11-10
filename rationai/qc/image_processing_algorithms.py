@@ -14,17 +14,14 @@ def area_opening(img: BinaryMask, area_threshold: int) -> BinaryMask:
     Returns:
         Binary mask with small connected components removed.
     """
-    output = np.zeros_like(img, dtype=bool)
-
-    num_labels, labels, stats, _ = cv.connectedComponentsWithStats(
+    _, labels, stats, _ = cv.connectedComponentsWithStats(
         img.astype(np.uint8), connectivity=4
     )
 
-    for i in range(1, num_labels):
-        if stats[i, cv.CC_STAT_AREA] >= area_threshold:
-            output[labels == i] = True
+    keep = stats[:, cv.CC_STAT_AREA] >= area_threshold
+    keep[0] = False  # Background label should not be kept
 
-    return output
+    return keep[labels]
 
 
 def erosion_with_disk(mask: BinaryMask, radius: int) -> BinaryMask:
@@ -53,21 +50,11 @@ def reconstruction(marker: BinaryMask, mask: BinaryMask) -> BinaryMask:
     Returns:
         Reconstructed binary mask.
     """
-    cv_mask = mask.astype(np.uint8)
-    cv_marker = marker.astype(np.uint8)
+    num_labels, labels = cv.connectedComponents(mask.astype(np.uint8), connectivity=8)
 
-    se = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+    # Keep every mask component that contains at least one marker pixel
+    keep = np.zeros(num_labels, dtype=bool)
+    keep[labels[marker & mask]] = True
+    keep[0] = False  # Background label should not be kept
 
-    cv_current = cv.bitwise_and(cv_marker, cv_mask)
-    cv_reconstructed = np.zeros_like(cv_mask, dtype=np.uint8)
-
-    while True:
-        cv.dilate(cv_current, se, dst=cv_reconstructed)
-        cv.bitwise_and(cv_reconstructed, cv_mask, dst=cv_reconstructed)
-
-        if np.array_equal(cv_reconstructed, cv_current):
-            break
-
-        cv_current = cv_reconstructed.copy()
-
-    return cv_current.astype(bool)
+    return keep[labels]
