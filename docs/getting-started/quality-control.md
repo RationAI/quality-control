@@ -148,7 +148,7 @@ tissue_mask_img = tissue_mask(
     pyvips.Image.new_from_array(img_c), mpp=pixel_size
 ).numpy()
 
-tissue_mask_img = (tissue_mask_img > 0).astype(int)  # binarize mask
+tissue_mask_img = tissue_mask_img > 0  # binarize mask
 
 # blur score with tissue mask
 blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask_img)

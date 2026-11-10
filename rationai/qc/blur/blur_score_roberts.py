@@ -69,6 +69,9 @@ def blur_score_roberts(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
+    # Ensure the provided mask is binary
+    foreground_mask = foreground_mask.astype(bool, copy=False)
+
     grayscale_img *= 255
     gradient = roberts(grayscale_img)
     gaussian_gradient = roberts(gaussian(grayscale_img, sigma=1))
@@ -83,8 +86,8 @@ def blur_score_roberts(
     # Higher threshold means more pixels are considered blurred
     blur_score_per_pixel = blur_score_pooled < threshold
 
-    # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel *= foreground_mask
+    # Restrict the detections to the foreground to nullify background pixels
+    blur_score_per_pixel &= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,

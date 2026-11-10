@@ -75,6 +75,9 @@ def blur_score_laplacian(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
+    # Ensure the provided mask is binary
+    foreground_mask = foreground_mask.astype(bool, copy=False)
+
     hematoxylin, _, _ = convert_color(img, StandardConversions.RGB2HER)
 
     hematoxylin_threshold = threshold_otsu(hematoxylin)
@@ -85,7 +88,7 @@ def blur_score_laplacian(
     footprint = np.ones((3, 3))
     # 2 pixels wide border is removed from the pooling mask for each hematoxylin nucleus
     # to ignore gradient values on the edges of the nuclei
-    pooling_mask = foreground_mask * ~(
+    pooling_mask = foreground_mask & ~(
         dilation(hematoxylin_mask, footprint=footprint)
         ^ erosion(hematoxylin_mask, footprint=footprint)
     )
@@ -98,8 +101,8 @@ def blur_score_laplacian(
     # Higher threshold means more pixels are considered blurred
     blur_score_per_pixel = blur_score_pooled < threshold
 
-    # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel *= foreground_mask
+    # Restrict the detections to the foreground to nullify background pixels
+    blur_score_per_pixel &= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,

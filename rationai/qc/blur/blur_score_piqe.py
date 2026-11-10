@@ -95,8 +95,11 @@ def blur_score_piqe(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
+    # Ensure the provided mask is binary
+    foreground_mask = foreground_mask.astype(bool, copy=False)
+
     # Invert and restrict the mask to foreground
-    activity_mask = foreground_mask * ~(activity_mask > 0)
+    activity_mask = foreground_mask & ~(activity_mask > 0)
 
     if erosion_radius > 0:
         marker = erosion_with_disk(activity_mask, erosion_radius)
