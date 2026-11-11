@@ -25,10 +25,14 @@ def blur_score_piqe(
             foreground_mask is used to nullify blur detections in the background.
             The standard tissue mask has proven to be too coarse for this use, especially
             for tiles with little or no background.
-        erosion_radius: Radius of the disk used for erosion of the blur score mask. The result of the erosion
-            is used as a marker for the reconstruction of the blur score mask. This step is used to remove
-            small isolated detections that are likely false positives. The default value is 0,
+        erosion_radius: Radius of the disk (in pixels) used for erosion of the blur score mask. The result
+            of the erosion is used as a marker for the reconstruction of the blur score mask. This step
+            is used to remove small isolated detections that are likely false positives. The default value is 0,
             which means no erosion is applied.
+            If you encounter cases where the blur score mask contains small isolated detections that are really
+            not blurred (e.g., some "homogenous" tissue areas), you can try setting the erosion radius based
+            on the size of these areas to suppress them. Any region that survives the erosion will be reconstructed
+            in the final mask, while regions that do not survive the erosion will not be present.
 
     Returns:
         Dictionary with the per-pixel and coverage mask
