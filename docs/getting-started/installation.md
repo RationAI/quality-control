@@ -24,11 +24,10 @@
     (used for computing tissue masks in the examples) requires [OpenSlide](https://openslide.org/)
     through its `openslide-python` bindings. The OpenSlide library itself needs to be installed separately:
 
-    === "openslide-bin (all platforms)"
-        (*Note that this command assumes an existing uv project.*)
+    === "openslide-bin (all platforms) via pip"
 
         ```bash
-        uv add openslide-bin
+        pip install openslide-bin
         ```
 
     === "Linux"
@@ -42,6 +41,10 @@
         ```bash
         brew install openslide
         ```
+
+        On Apple Silicon, Homebrew installs libraries into `/opt/homebrew/lib`, which Python
+        does not search by default. If `import openslide` fails, use the `openslide-bin` option
+        above, or set `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` before starting Python.
 
     For more details, see the [OpenSlide Python installation guide](https://openslide.org/api/python/#installing).
 

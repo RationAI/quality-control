@@ -74,14 +74,18 @@ def folding(
     Note:
         The returned dictionary contains the following values:
 
-        | Key                         | Description                                                                 |
-        |-----------------------------|-----------------------------------------------------------------------------|
-        | `folding_per_pixel`         | Binary mask of the detected folds.                                          |
-        | `thresholded_saturation`    | Thresholded saturation channel (intermediate result, useful for debugging). |
-        | `thresholded_value`         | Thresholded value channel (intermediate result, useful for debugging).      |
-        | `thresholded_eosin`         | Thresholded eosin channel (intermediate result, useful for debugging).      |
-        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function.                       |
-        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                                      |
+        | Key                         | Description                                                                                                                              |
+        |-----------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+        | `folding_per_pixel`         | Binary mask of the detected folds.                                                                                                       |
+        | `thresholded_saturation`    | Thresholded saturation channel (intermediate result, useful for debugging).                                                              |
+        | `thresholded_value`         | Thresholded inverted value channel (intermediate result, useful for debugging). All zeros if the thresholding is unreliable (see below). |
+        | `thresholded_eosin`         | Thresholded eosin channel (intermediate result, useful for debugging). All ones if `hematoxylin_eosin_stained` is `False`.               |
+        | `number_of_examined_pixels` | Number of pixels that were evaluated by the function.                                                                                    |
+        | `number_of_flagged_pixels`  | Number of pixels labeled as artifacts.                                                                                                   |
+
+        The thresholding is considered unreliable if more than half of the image pixels
+        exceed the threshold in the saturation, inverted value, or (for H&E stained images) eosin channel.
+        In that case, `thresholded_value` is replaced with zeros and no folds are detected.
 
     Examples:
     ```python
