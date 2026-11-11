@@ -10,6 +10,12 @@ Instead, the functions are expected to be run on smaller WSI regions and regular
 This should provide reasonable options for debugging potential problems, while avoiding
 the technical overhead needed for processing the complete WSIs.
 
+For processing complete WSIs, we suggest considering the [RationAI QC Service](https://gitlab.ics.muni.cz/rationai/digital-pathology/quality-control/service),
+which uses the provided QC functions and is optimized for processing complete WSIs.
+Be sure to check the service's [documentation](https://quality-control-rationai-digital-pathology-quali-82f7255ed88b44.gitlab-pages.ics.muni.cz/feature-qol-improvements/)
+for more information on how to use it.
+(*Please note that the link to the documentation may change in the future. Please let us know if you encounter any issues with accessing the documentation.*)
+
 ## Examples
 
 The following examples should provide you with the necessary information for running the provided QC functions.
@@ -47,7 +53,7 @@ function and call it on the input image:
 conversion = StandardConversions.RGB2HER
 thresholds = StandardResidualThresholds.HER
 nucleus_area = 30
-nuclei_channel = NegativeChannel.C2
+suppression_channel = NegativeChannel.C2
 erosion_radius = 5
 
 artifacts = residual_artifacts_and_coverage(
@@ -55,7 +61,7 @@ artifacts = residual_artifacts_and_coverage(
     conversion=conversion,
     nucleus_area=nucleus_area,
     thresholds=thresholds,
-    nuclei_channel=nuclei_channel,
+    suppression_channel=suppression_channel,
     erosion_radius=erosion_radius,
 )
 ```
@@ -68,9 +74,10 @@ The used thresholds are the suggested values for the `RGB2HER` conversion provid
 The nucleus area is manually approximated from the input image (nuclei are roughly 6 pixels wide),
 and all detections smaller than a single nucleus are removed.
 
-Finally, the negative part of the eosin channel (`NegativeChannel.C2`) can incorrectly mark clusters of tightly packed nuclei
-as artifacts. By specifying the `nuclei_channel` parameter, only the detections in this channel that survive erosion
-with a disk of radius `erosion_radius` are kept. Therefore, small clusters of nuclei are removed, while larger artifacts are preserved.
+Finally, in H&E stained tissue, clusters of tightly packed nuclei can produce negative values in the eosin channel
+and be incorrectly marked as artifacts. To prevent this, we set the `suppression_channel` parameter to the negative part
+of the eosin channel (`NegativeChannel.C2`). In this channel, only the detections that survive erosion with a disk
+of radius `erosion_radius` are kept. Therefore, small clusters of nuclei are removed, while larger artifacts are preserved.
 
 After obtaining the results, we can save the binary artifact mask and print the number of examined and flagged pixels:
 

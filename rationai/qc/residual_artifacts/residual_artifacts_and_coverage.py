@@ -45,7 +45,7 @@ def _get_debris_coverage(
     conv: ColorConversion,
     nucleus_area: int,
     thresholds: ResidualThresholds,
-    nuclei_channel: NegativeChannel | None = None,
+    suppression_channel: NegativeChannel | None = None,
     erosion_radius: int = 0,
 ) -> tuple[int, int, BinaryMask]:
     """Computes foreground debris coverage by thresholding specific channels.
@@ -56,12 +56,14 @@ def _get_debris_coverage(
         nucleus_area: Approximate area of a single cell nucleus in pixels.
         thresholds: Thresholds for residual artifact detection.
             See the `StandardResidualThresholds` class for suggested threshold values.
-        nuclei_channel: Optional negative part of a separated channel that could contain
-            incorrectly detected tightly packed nuclei. If specified, only connected
-            components of the detection in this channel that survive erosion
-            with a disk of radius `erosion_radius` are kept.
-        erosion_radius: Radius of the disk used for erosion. Only relevant
-            if `nuclei_channel` is specified. Defaults to 0.
+        suppression_channel: Optional negative channel in which small detections are suppressed
+            (e.g., clusters of tightly packed nuclei falsely detected in the negative eosin
+            channel of H&E images). If specified, only connected components of the detection
+            in this channel that survive erosion with a disk of radius `erosion_radius` are kept.
+        erosion_radius: Radius of the disk (in pixels) used for erosion. Only relevant
+            if `suppression_channel` is specified. Defaults to 0.
+            If `suppression_channel` is to be used, it is recommended to set `erosion_radius`
+            based on the approximate size of objects that should be suppressed.
 
     Returns:
         Number of foreground pixels examined, number of foreground pixels
@@ -78,14 +80,14 @@ def _get_debris_coverage(
     mask_c3_pos = +np.maximum(c3, 0) >= thresholds.c3_positive
     mask_c3_neg = -np.minimum(c3, 0) >= thresholds.c3_negative
 
-    if nuclei_channel is not None and erosion_radius > 0:
-        # Suppressing incorrect detections of tightly packed nuclei
+    if suppression_channel is not None and erosion_radius > 0:
+        # Suppress small detections in the selected channel (e.g., tightly packed nuclei)
         channels = [mask_c1_neg, mask_c2_neg, mask_c3_neg]
 
-        channel = channels[nuclei_channel.value]
+        channel = channels[suppression_channel.value]
         marker = erosion_with_disk(channel, radius=erosion_radius)
 
-        channels[nuclei_channel.value] = reconstruction(marker, channel)
+        channels[suppression_channel.value] = reconstruction(marker, channel)
 
         mask_c1_neg, mask_c2_neg, mask_c3_neg = channels
 
@@ -113,7 +115,7 @@ def residual_artifacts_and_coverage(
     conversion: ColorConversion,
     nucleus_area: int,
     thresholds: ResidualThresholds,
-    nuclei_channel: NegativeChannel | None = None,
+    suppression_channel: NegativeChannel | None = None,
     erosion_radius: int = 0,
 ) -> ResidualArtifacts:
     """Creates a binary mask of residual artifacts.
@@ -124,11 +126,14 @@ def residual_artifacts_and_coverage(
         nucleus_area: Approximate area of a single cell nucleus in pixels.
         thresholds: Thresholds for residual artifact detection.
             See the `StandardResidualThresholds` class for suggested threshold values.
-        nuclei_channel: Optional negative part of a separated channel that could contain
-            incorrectly detected tightly packed nuclei. If specified, only connected
-            components that survive erosion with a disk of radius `erosion_radius` are kept.
-        erosion_radius: Radius of the disk used for erosion. Only relevant
-            if `nuclei_channel` is specified. Defaults to 0.
+        suppression_channel: Optional negative channel in which small detections are suppressed
+            (e.g., clusters of tightly packed nuclei falsely detected in the negative eosin
+            channel of H&E images). If specified, only connected components of the detection
+            in this channel that survive erosion with a disk of radius `erosion_radius` are kept.
+        erosion_radius: Radius of the disk (in pixels) used for erosion. Only relevant
+            if `suppression_channel` is specified. Defaults to 0.
+            If `suppression_channel` is to be used, it is recommended to set `erosion_radius`
+            based on the approximate size of objects that should be suppressed.
 
     Returns:
         Dictionary with a number of examined pixels, number of flagged pixels,
@@ -169,7 +174,7 @@ def residual_artifacts_and_coverage(
         conv=conversion,
         nucleus_area=nucleus_area,
         thresholds=thresholds,
-        nuclei_channel=nuclei_channel,
+        suppression_channel=suppression_channel,
         erosion_radius=erosion_radius,
     )
 
