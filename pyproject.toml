@@ -22,11 +22,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "mypy",
-    "pre-commit",
-    "ruff",
-]
+dev = ["mypy", "ruff"]
 test = ["pytest", "pytest-cov"]
 docs = [
     "mkdocs-material>=9.5.32",
