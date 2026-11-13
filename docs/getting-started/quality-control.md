@@ -51,8 +51,8 @@ function and call it on the input image:
 
 ```python linenums="15"
 conversion = StandardConversions.RGB2HER
-thresholds = StandardResidualThresholds.HER
 nucleus_area = 30
+thresholds = StandardResidualThresholds.HER
 suppression_channel = NegativeChannel.C2
 erosion_radius = 5
 
