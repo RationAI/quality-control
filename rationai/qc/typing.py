@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum
-from typing import TypeAlias, TypedDict
+from typing import Literal, TypeAlias, TypedDict
 
 import numpy as np
 from numpy.typing import NDArray
@@ -31,18 +30,16 @@ Stain: TypeAlias = NDArray[np.float64]
 Single stain vector (of 3 values) represented by a numpy array.
 """
 
+NegativeChannel: TypeAlias = Literal["c1_negative", "c2_negative", "c3_negative"]
+"""
+Name of the negative part of a color separated channel.
 
-class NegativeChannel(Enum):
-    """Enum labeling negative parts of color separated channels."""
+The values match the corresponding field names of the `ResidualThresholds` class:
 
-    C1 = 0
-    """Negative part of the first converted channel."""
-
-    C2 = 1
-    """Negative part of the second converted channel."""
-
-    C3 = 2
-    """Negative part of the third converted channel."""
+- `"c1_negative"` - negative part of the first converted channel.
+- `"c2_negative"` - negative part of the second converted channel.
+- `"c3_negative"` - negative part of the third converted channel.
+"""
 
 
 @dataclass(frozen=True)

@@ -53,7 +53,7 @@ function and call it on the input image:
 conversion = StandardConversions.RGB2HER
 nucleus_area = 30
 thresholds = StandardResidualThresholds.HER
-suppression_channel = NegativeChannel.C2
+suppression_channel: NegativeChannel = "c2_negative"
 erosion_radius = 5
 
 artifacts = residual_artifacts_and_coverage(
@@ -76,7 +76,7 @@ and all detections smaller than a single nucleus are removed.
 
 Finally, in H&E stained tissue, clusters of tightly packed nuclei can produce negative values in the eosin channel
 and be incorrectly marked as artifacts. To prevent this, we set the `suppression_channel` parameter to the negative part
-of the eosin channel (`NegativeChannel.C2`). In this channel, only the detections that survive erosion with a disk
+of the eosin channel (`"c2_negative"`). In this channel, only the detections that survive erosion with a disk
 of radius `erosion_radius` are kept. Therefore, small clusters of nuclei are removed, while larger artifacts are preserved.
 
 After obtaining the results, we can save the binary artifact mask and print the number of examined and flagged pixels:
