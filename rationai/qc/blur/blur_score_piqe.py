@@ -3,7 +3,11 @@ from skimage.color import rgb2gray
 from skimage.filters import median
 
 from rationai.qc.blur.piqe import piqe
-from rationai.qc.blur.utils import get_coverage_mask, simple_foreground_mask
+from rationai.qc.blur.utils import (
+    get_coverage_mask,
+    simple_foreground_mask,
+    to_binary_mask,
+)
 from rationai.qc.image_processing_algorithms import erosion_with_disk, reconstruction
 from rationai.qc.typing import BinaryMask, BlurScore, RGBImage
 
@@ -25,6 +29,8 @@ def blur_score_piqe(
             foreground_mask is used to nullify blur detections in the background.
             The standard tissue mask has proven to be too coarse for this use, especially
             for tiles with little or no background.
+            Masks that are not of boolean type are converted to bool (non-zero values
+            are treated as tissue) and a `UserWarning` is issued.
         erosion_radius: Radius of the disk (in pixels) used for erosion of the blur score mask. The result
             of the erosion is used as a marker for the reconstruction of the blur score mask. This step
             is used to remove small isolated detections that are likely false positives. The default value is 0,
@@ -99,8 +105,7 @@ def blur_score_piqe(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
-    # Ensure the provided mask is binary
-    foreground_mask = foreground_mask.astype(bool, copy=False)
+    foreground_mask = to_binary_mask(foreground_mask)
 
     # Invert and restrict the mask to foreground
     activity_mask = foreground_mask & ~(activity_mask > 0)
