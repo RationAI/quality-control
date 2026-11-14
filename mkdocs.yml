@@ -9,7 +9,10 @@ nav:
   - API Reference:
       - blur_score_piqe: api/blur/blur-score-piqe.md
       - folding: api/folding/folding.md
-      - residual_artifacts_and_coverage: api/residual_artifacts/residual-artifacts-and-coverage.md
+      - residual_artifacts:
+        - residual_artifacts_and_coverage: api/residual_artifacts/residual-artifacts-and-coverage.md
+        - StandardResidualThresholds: api/residual_artifacts/standard-residual-thresholds.md
+        - visualize_thresholds: api/residual_artifacts/visualize-thresholds.md
       - staining:
         - dominant_stains: api/staining/dominant-stains.md
         - staining_difference: api/staining/staining-difference.md

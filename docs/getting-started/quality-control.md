@@ -151,12 +151,14 @@ tissue_mask_img = tissue_mask(
 tissue_mask_img = tissue_mask_img > 0  # binarize mask
 
 # blur score with tissue mask
-blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask_img)
+blur_score_c = blur_score_piqe(img_c, pixel_size, foreground_mask=tissue_mask_img)
 ```
 
 The `pixel_size` parameter is used to calculate the kernel size for median filter that is used during the computation.
 The function gives most accurate results on images with pixel size around 0.44 micrometers.
-The `tissue_mask` param is optional and will be calculated inside the function if not present, but can be provided by the user to avoid unnecessary computation.
+The `foreground_mask` param is optional and will be calculated inside the function if not present, but can be provided by the user to avoid unnecessary computation.
+Please note that the standard tissue mask used above can be too coarse for tiles with little or no background.
+In such cases, it is better to omit the `foreground_mask` parameter and let the function compute a more precise foreground mask.
 
 The optional `erosion_radius` parameter enables postprocessing of the detected blurred areas.
 The blur mask is eroded with a disk of the given radius, and only the detections that survive the erosion
@@ -164,13 +166,14 @@ are reconstructed back to their original shape. This removes small isolated dete
 and both of the returned masks are computed from the postprocessed detections.
 The default value is 0, which means that no postprocessing is applied (as in this example).
 
-The blur function outputs 2 masks - `blur_score_coverage` and `blur_score_per_pixel`.
+The blur function returns a dictionary with 2 masks - `blur_score_coverage` and `blur_score_per_pixel`.
 `blur_score_per_pixel` is a binary mask marking the areas of the image that are considered blurred, while `blur_score_coverage` provides a blur coverage score for the whole image indicating the degree of blur.
+The dictionary also contains `number_of_examined_pixels` (number of foreground pixels) and `number_of_flagged_pixels` (number of pixels marked as blurred).
 
 After obtaining the results, we can save the computed blur score masks.
 Since `blur_score_coverage` is homogeneous across the image, we can just print out any value from the score mask for quick inspection:
 
-```python linenums="29"
+```python linenums="27"
 print(blur_score_a["blur_score_coverage"][0][0])
 
 # save the coverage masks
@@ -251,18 +254,18 @@ from rationai.qc import folding
 
 mpp = 1.76
 img = np.asarray(Image.open("fold.png").convert("RGB"))  # Investigated image
-neigborhood_image = np.asarray(
+neighborhood_image = np.asarray(
     Image.open("fold_area.png").convert("RGB")
 )  # Neighborhood area of investigated image
 ```
 
 Now we can calculate the tissue masks:
 
-```python linenums="12"
+```python linenums="14"
 img_mask = tissue_mask(pyvips.Image.new_from_array(img), mpp=mpp).numpy() > 0
 
 neighborhood_mask = (
-    tissue_mask(pyvips.Image.new_from_array(neigborhood_image), mpp=mpp).numpy() > 0
+    tissue_mask(pyvips.Image.new_from_array(neighborhood_image), mpp=mpp).numpy() > 0
 )
 ```
 
@@ -274,7 +277,7 @@ artifacts = folding(
     mpp=mpp,
     hematoxylin_eosin_stained=True,
     tissue_mask=img_mask,
-    neighborhood_tiles=neigborhood_image,
+    neighborhood_tiles=neighborhood_image,
     neighborhood_mask=neighborhood_mask,
 )
 ```
@@ -283,7 +286,7 @@ artifacts = folding(
 
 To recover the results, one needs to access the `artifacts` dictionary.
 
-```python linenums="27"
+```python linenums="29"
 mask = Image.fromarray(255 * artifacts["folding_per_pixel"].astype(np.uint8))
 ```
 

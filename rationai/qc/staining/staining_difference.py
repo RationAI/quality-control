@@ -17,7 +17,7 @@ def staining_difference(
     color_difference_method: str = "ciede_2000",
     single_stain_difference_method: str = "cie_76",
 ) -> StainingDifference:
-    """Decides if the given stains are close engough to the reference stains.
+    """Decides if the given stains are close enough to the reference stains.
 
     Args:
         conversion: First two stains of this conversion specify
@@ -34,7 +34,7 @@ def staining_difference(
             and desired level of strictness.
 
         single_stain_threshold: Threshold that determines if `stain1` and `stain2`
-            are too close to eachother. If so, the region in which the stains were
+            are too close to each other. If so, the region in which the stains were
             detected is assumed to be stained only by a single stain and the second
             color difference is set to 0.
             Currently recommended value for H&DAB stained slides and the recommended
@@ -109,7 +109,7 @@ def staining_difference(
         < single_stain_threshold
     ):
         # The detected dominant stains are too close, they probably came from a region
-        # stained with only one stain. Therefore, no color the difference is computed
+        # stained with only one stain. Therefore, no color difference is computed
         # for the second stain.
         diff1 = min(diff1, diff2)
         diff2 = 0.0
