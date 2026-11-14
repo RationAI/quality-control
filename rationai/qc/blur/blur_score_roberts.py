@@ -6,6 +6,7 @@ from rationai.qc.blur.utils import (
     get_coverage_mask,
     masked_average_pooling,
     simple_foreground_mask,
+    to_binary_mask,
 )
 from rationai.qc.typing import BinaryMask, BlurScore, RGBImage
 
@@ -30,6 +31,8 @@ def blur_score_roberts(
             foreground_mask is used to nullify blur detections in the background.
             The standard tissue mask has proven to be too coarse for this use, especially
             for tiles with little or no background.
+            Masks that are not of boolean type are converted to bool (non-zero values
+            are treated as tissue) and a `UserWarning` is issued.
 
     Returns:
         Dictionary with the per-pixel and coverage mask
@@ -69,6 +72,8 @@ def blur_score_roberts(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
+    foreground_mask = to_binary_mask(foreground_mask)
+
     grayscale_img *= 255
     gradient = roberts(grayscale_img)
     gaussian_gradient = roberts(gaussian(grayscale_img, sigma=1))
@@ -83,8 +88,8 @@ def blur_score_roberts(
     # Higher threshold means more pixels are considered blurred
     blur_score_per_pixel = blur_score_pooled < threshold
 
-    # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel *= foreground_mask
+    # Restrict the detections to the foreground to nullify background pixels
+    blur_score_per_pixel &= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,

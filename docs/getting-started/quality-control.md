@@ -148,7 +148,7 @@ tissue_mask_img = tissue_mask(
     pyvips.Image.new_from_array(img_c), mpp=pixel_size
 ).numpy()
 
-tissue_mask_img = (tissue_mask_img > 0).astype(int)  # binarize mask
+tissue_mask_img = tissue_mask_img > 0  # binarize mask
 
 # blur score with tissue mask
 blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask_img)
@@ -157,6 +157,12 @@ blur_score_c = blur_score_piqe(img_c, pixel_size, tissue_mask_img)
 The `pixel_size` parameter is used to calculate the kernel size for median filter that is used during the computation.
 The function gives most accurate results on images with pixel size around 0.44 micrometers.
 The `tissue_mask` param is optional and will be calculated inside the function if not present, but can be provided by the user to avoid unnecessary computation.
+
+The optional `erosion_radius` parameter enables postprocessing of the detected blurred areas.
+The blur mask is eroded with a disk of the given radius, and only the detections that survive the erosion
+are reconstructed back to their original shape. This removes small isolated detections that are likely false positives,
+and both of the returned masks are computed from the postprocessed detections.
+The default value is 0, which means that no postprocessing is applied (as in this example).
 
 The blur function outputs 2 masks - `blur_score_coverage` and `blur_score_per_pixel`.
 `blur_score_per_pixel` is a binary mask marking the areas of the image that are considered blurred, while `blur_score_coverage` provides a blur coverage score for the whole image indicating the degree of blur.

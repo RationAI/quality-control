@@ -8,6 +8,7 @@ from rationai.qc.blur.utils import (
     get_coverage_mask,
     masked_average_pooling,
     simple_foreground_mask,
+    to_binary_mask,
 )
 from rationai.qc.typing import BinaryMask, BlurScore, RGBImage
 
@@ -34,6 +35,8 @@ def blur_score_laplacian(
             foreground_mask is used to nullify blur detections in the background.
             The standard tissue mask has proven to be too coarse for this use, especially
             for tiles with little or no background.
+            Masks that are not of boolean type are converted to bool (non-zero values
+            are treated as tissue) and a `UserWarning` is issued.
 
 
     Returns:
@@ -75,6 +78,8 @@ def blur_score_laplacian(
     if foreground_mask is None:
         foreground_mask = simple_foreground_mask(grayscale_img)
 
+    foreground_mask = to_binary_mask(foreground_mask)
+
     hematoxylin, _, _ = convert_color(img, StandardConversions.RGB2HER)
 
     hematoxylin_threshold = threshold_otsu(hematoxylin)
@@ -85,7 +90,7 @@ def blur_score_laplacian(
     footprint = np.ones((3, 3))
     # 2 pixels wide border is removed from the pooling mask for each hematoxylin nucleus
     # to ignore gradient values on the edges of the nuclei
-    pooling_mask = foreground_mask * ~(
+    pooling_mask = foreground_mask & ~(
         dilation(hematoxylin_mask, footprint=footprint)
         ^ erosion(hematoxylin_mask, footprint=footprint)
     )
@@ -98,8 +103,8 @@ def blur_score_laplacian(
     # Higher threshold means more pixels are considered blurred
     blur_score_per_pixel = blur_score_pooled < threshold
 
-    # activity_mask is multiplied by the foreground mask to nullify background pixels
-    blur_score_per_pixel *= foreground_mask
+    # Restrict the detections to the foreground to nullify background pixels
+    blur_score_per_pixel &= foreground_mask
 
     return {
         "blur_score_per_pixel": blur_score_per_pixel,

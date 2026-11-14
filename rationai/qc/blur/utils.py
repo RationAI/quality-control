@@ -1,3 +1,4 @@
+import warnings
 from typing import Any
 
 import numpy as np
@@ -109,3 +110,33 @@ def simple_foreground_mask(
     foreground_mask = erosion(foreground_mask, footprint=np.ones((5, 5)))
 
     return foreground_mask
+
+
+def to_binary_mask(mask: NDArray[Any], name: str = "foreground_mask") -> BinaryMask:
+    """Converts a mask to a boolean binary mask, warning if conversion is needed.
+
+    Intended to be called directly from the public blur functions, so that
+    the warning points to the line where the user called that function.
+
+    Args:
+        mask: Mask to be converted. Non-zero values are treated as foreground.
+        name: Name of the parameter used in the warning message.
+
+    Returns:
+        Boolean binary mask. If the input is already boolean, it is returned unchanged.
+
+    Warns:
+        UserWarning: If the mask is not of boolean type.
+    """
+    if mask.dtype == np.bool_:
+        return mask
+
+    warnings.warn(
+        f"`{name}` has dtype {mask.dtype}, but a boolean mask was expected. "
+        "The mask is converted to bool and all non-zero values are treated "
+        "as foreground.",
+        UserWarning,
+        stacklevel=3,
+    )
+
+    return mask.astype(bool)
