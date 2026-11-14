@@ -1,8 +1,20 @@
+from typing import get_args
+
 import numpy as np
 from rationai.staining import ColorConversion, convert_color
-from skimage.morphology import area_opening
 
-from rationai.qc.typing import BinaryMask, ResidualArtifacts, RGBImage
+from rationai.qc.image_processing_algorithms import (
+    area_opening,
+    erosion_with_disk,
+    reconstruction,
+)
+from rationai.qc.typing import (
+    BinaryMask,
+    NegativeChannel,
+    ResidualArtifacts,
+    ResidualThresholds,
+    RGBImage,
+)
 
 
 def _get_foreground_mask(
@@ -22,46 +34,67 @@ def _get_foreground_mask(
     Returns:
         Binary foreground mask of the tile.
     """
-    img = img.astype(np.float64)
-
     # Value of zero corresponds to a pixel that did not capture any light
     # Nearly no stain -> low OD values
-    od = np.maximum(0, -np.log((img + 1) / i0))
-    od_channel_sum = np.sum(np.where(od >= beta, 1, 0), axis=2)
+    od = np.maximum(0, -np.log((img.astype(np.float64) + 1) / i0))
 
     # Pixel is labeled as foreground if it is larger than beta in at least one channel
-    return od_channel_sum != 0
+    return np.any(od >= beta, axis=2)
 
 
 def _get_debris_coverage(
     img: RGBImage,
     conv: ColorConversion,
-    nucleus_area: float,
-    res_index: int,
-    threshold: float,
+    nucleus_area: int,
+    thresholds: ResidualThresholds,
+    suppression_channel: NegativeChannel | None = None,
+    erosion_radius: int = 0,
 ) -> tuple[int, int, BinaryMask]:
-    """Calculates the percentage of the foreground debris coverage.
+    """Computes foreground debris coverage by thresholding specific channels.
 
     Args:
         img: Image of a tissue.
         conv: Color conversion that should be performed to extract the residual channel.
         nucleus_area: Approximate area of a single cell nucleus in pixels.
-        res_index: Index of the residual channel.
-        threshold: Value that is enough for a pixel to be marked as artifact.
-            Currently recommended threshold value for H&E stained slides is `0.005`.
-            This value was declared emprirically and should provide a strict
-            detection of artifacts.
-            Depending on the match between the tissue and the expected staining protocol,
-            slightly higher values could also provide reasonable results.
+        thresholds: Thresholds for residual artifact detection.
+            See the `StandardResidualThresholds` class for suggested threshold values.
+        suppression_channel: Optional negative channel in which small detections are suppressed
+            (e.g., clusters of tightly packed nuclei falsely detected in the negative eosin
+            channel of H&E images). If specified, only connected components of the detection
+            in this channel that survive erosion with a disk of radius `erosion_radius` are kept.
+        erosion_radius: Radius of the disk (in pixels) used for erosion. Only relevant
+            if `suppression_channel` is specified. Defaults to 0.
+            If `suppression_channel` is to be used, it is recommended to set `erosion_radius`
+            based on the approximate size of objects that should be suppressed.
 
     Returns:
         Number of foreground pixels examined, number of foreground pixels
             marked as artifact, and the thresholded residual channel.
     """
-    residual = np.asarray(
-        convert_color(tile=img, conversion=conv)[res_index], dtype=np.float64
+    c1, c2, c3 = np.asarray(
+        convert_color(tile=img, conversion=conv, keep_negative_values=True),
+        dtype=np.float64,
     )
-    residual_mask = residual >= threshold
+
+    negative_masks: dict[NegativeChannel, BinaryMask] = {
+        "c1_negative": -np.minimum(c1, 0) >= thresholds.c1_negative,
+        "c2_negative": -np.minimum(c2, 0) >= thresholds.c2_negative,
+        "c3_negative": -np.minimum(c3, 0) >= thresholds.c3_negative,
+    }
+
+    mask_c3_pos = +np.maximum(c3, 0) >= thresholds.c3_positive
+
+    if suppression_channel is not None and erosion_radius > 0:
+        # Suppress small detections in the selected channel (e.g., tightly packed nuclei)
+        channel = negative_masks[suppression_channel]
+        marker = erosion_with_disk(channel, radius=erosion_radius)
+
+        negative_masks[suppression_channel] = reconstruction(marker, channel)
+
+    residual_mask = np.logical_or(
+        np.logical_or(negative_masks["c1_negative"], negative_masks["c2_negative"]),
+        np.logical_or(mask_c3_pos, negative_masks["c3_negative"]),
+    )
 
     # Remove artifacts smaller that a single nucleus
     residual_mask = area_opening(residual_mask, area_threshold=nucleus_area)
@@ -70,7 +103,7 @@ def _get_debris_coverage(
     foreground_area = np.count_nonzero(foreground_mask)
 
     # Keep only artifacts in the foreground
-    residual_mask *= foreground_mask
+    residual_mask &= foreground_mask
 
     if foreground_area <= 0:
         return 0, 0, residual_mask
@@ -82,8 +115,9 @@ def residual_artifacts_and_coverage(
     img: RGBImage,
     conversion: ColorConversion,
     nucleus_area: int,
-    res_index: int,
-    threshold: float,
+    thresholds: ResidualThresholds,
+    suppression_channel: NegativeChannel | None = None,
+    erosion_radius: int = 0,
 ) -> ResidualArtifacts:
     """Creates a binary mask of residual artifacts.
 
@@ -91,17 +125,24 @@ def residual_artifacts_and_coverage(
         img: Image of a tissue.
         conversion: Conversion that describes the used staining protocol.
         nucleus_area: Approximate area of a single cell nucleus in pixels.
-        res_index: Index of the residual channel in the used staining conversion.
-        threshold: Threshold that determines if a given pixel is an artifact.
-            Currently recommended threshold value for H&E stained slides is `0.005`.
-            This value was declared emprirically and should provide a strict
-            detection of artifacts.
-            Depending on the match between the tissue and the expected staining protocol,
-            slightly higher values could also provide reasonable results.
+        thresholds: Thresholds for residual artifact detection.
+            See the `StandardResidualThresholds` class for suggested threshold values.
+        suppression_channel: Optional negative channel in which small detections are suppressed
+            (e.g., clusters of tightly packed nuclei falsely detected in the negative eosin
+            channel of H&E images). One of `"c1_negative"`, `"c2_negative"`, or `"c3_negative"`.
+            If specified, only connected components of the detection in this channel
+            that survive erosion with a disk of radius `erosion_radius` are kept.
+        erosion_radius: Radius of the disk (in pixels) used for erosion. Only relevant
+            if `suppression_channel` is specified. Defaults to 0.
+            If `suppression_channel` is to be used, it is recommended to set `erosion_radius`
+            based on the approximate size of objects that should be suppressed.
 
     Returns:
         Dictionary with a number of examined pixels, number of flagged pixels,
             and a binary mask of artifacts.
+
+    Raises:
+        ValueError: If `suppression_channel` is not one of the supported negative channels.
 
     Note:
         The returned dictionary contains the following values:
@@ -116,26 +157,38 @@ def residual_artifacts_and_coverage(
     ```python
     from skimage.data import immunohistochemistry
 
-    from rationai.qc import residual_artifacts_and_coverage
+    from rationai.qc import StandardResidualThresholds, residual_artifacts_and_coverage
     from rationai.staining import StandardConversions
 
 
     img = immunohistochemistry()
 
     result = residual_artifacts_and_coverage(
-        img, StandardConversions.RGB2HDR, nucleus_area=150, res_index=2, threshold=0.013
+        img,
+        StandardConversions.RGB2HDR,
+        nucleus_area=150,
+        thresholds=StandardResidualThresholds.HDR,
     )
 
     mask = result["artifacts_per_pixel"]  # Contains values 0 and 1
     print(result["number_of_flagged_pixels"], result["number_of_examined_pixels"])
     ```
     """
+    if suppression_channel is not None and suppression_channel not in get_args(
+        NegativeChannel
+    ):
+        raise ValueError(
+            f"Unsupported suppression channel '{suppression_channel}'. "
+            f"Expected one of: {', '.join(get_args(NegativeChannel))}."
+        )
+
     num_examined, num_flagged, cov_heatmap = _get_debris_coverage(
         img=img,
         conv=conversion,
         nucleus_area=nucleus_area,
-        res_index=res_index,
-        threshold=threshold,
+        thresholds=thresholds,
+        suppression_channel=suppression_channel,
+        erosion_radius=erosion_radius,
     )
 
     result: ResidualArtifacts = {

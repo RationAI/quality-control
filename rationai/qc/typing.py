@@ -1,4 +1,5 @@
-from typing import TypeAlias, TypedDict
+from dataclasses import dataclass
+from typing import Literal, TypeAlias, TypedDict
 
 import numpy as np
 from numpy.typing import NDArray
@@ -28,6 +29,53 @@ Stain: TypeAlias = NDArray[np.float64]
 """
 Single stain vector (of 3 values) represented by a numpy array.
 """
+
+NegativeChannel: TypeAlias = Literal["c1_negative", "c2_negative", "c3_negative"]
+"""
+Name of the negative part of a color separated channel.
+
+The values match the corresponding field names of the `ResidualThresholds` class:
+
+- `"c1_negative"` - negative part of the first converted channel.
+- `"c2_negative"` - negative part of the second converted channel.
+- `"c3_negative"` - negative part of the third converted channel.
+"""
+
+
+@dataclass(frozen=True)
+class ResidualThresholds:
+    """Class containing thresholds for residual artifact detection.
+
+    The thresholds are applied to negative parts of all three converted channels
+    and to the positive part of the third (residual) channel.
+    Please note that all thresholds should be specified as **positive values**,
+    the negative part of each channel is converted to positive values
+    during the detection process.
+    """
+
+    c1_negative: float
+    """Threshold for the negative part of the first converted channel."""
+
+    c2_negative: float
+    """Threshold for the negative part of the second converted channel."""
+
+    c3_negative: float
+    """Threshold for the negative part of the third converted channel."""
+
+    c3_positive: float
+    """Threshold for the positive part of the third converted channel."""
+
+    def __post_init__(self) -> None:
+        if any(
+            threshold <= 0
+            for threshold in (
+                self.c1_negative,
+                self.c2_negative,
+                self.c3_negative,
+                self.c3_positive,
+            )
+        ):
+            raise ValueError("All thresholds should be specified as positive values.")
 
 
 class CorrectStaining(TypedDict):
